@@ -2043,7 +2043,7 @@ Gui, Add, Button, x75 y260 w65 h20 -Wrap vPauseButton gnm_PauseButton Disabled, 
 Gui, Add, Button, x145 y260 w65 h20 -Wrap vStopButton gnm_StopButton Disabled, % " Stop (" StopHotkey ")"
 #include *i %A_ScriptDir%\..\settings\personal.ahk
 ;add tabs
-Gui, Add, Tab, x0 y-1 w500 h240 -Wrap hwndhTab vTab gnm_TabSelect, % "Gather|Collect/Kill|Boost|Quest|Planters|Status|Settings|Misc|Credits" ((BuffDetectReset = 1) ? "|Advanced" : "")
+Gui, Add, Tab, x0 y-1 w500 h240 -Wrap hwndhTab vTab gnm_TabSelect, % "Gather|Collect/Kill|Boost|Quest|Planters|Presets|Status|Settings|Misc|Credits" ((BuffDetectReset = 1) ? "|Advanced" : "")
 SendMessage, 0x1331, 0, 20, , ahk_id %hTab% ; set minimum tab width
 ;check for update
 try AsyncHttpRequest("GET", "https://api.github.com/repos/NatroTeam/NatroMacro/releases/latest", "nm_AutoUpdateHandler", {"accept": "application/vnd.github+json"})
@@ -2719,30 +2719,29 @@ Gui, Font, s8 cDefault Norm, Tahoma
 Gui, Tab, Presets
 
 Gui Font, s9, Segoe UI
-Gui Add, Text, x0 y0 w500 h25 +0x200 +Center +Border +0x1000, Presets
-Gui Add, Button, x24 y56 w90 h23, New/Overwrite
-Gui Add, GroupBox, x8 y40 w122 h108, Custom
-Gui Add, DropDownList, x24 y112 w90, variables|will|go|here
-Gui Add, DropDownList, x176 y88 w120, variables|will|go|here
-Gui Add, GroupBox, x8 y152 w122 h86, Pre-Mades
-Gui Add, DropDownList, x24 y200 w90, Pre-Made||Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
-Gui Add, GroupBox, x168 y40 w140 h210, Stats
-Gui Add, Text, x176 y168 w120 h23 +0x200 +Center, Goal:
-Gui Add, Text, x176 y216 w120 h23 +0x200 +Center, Amount:
-Gui Add, Text, x176 y64 w120 h23 +0x200 +Center, Selected Preset
-Gui Add, Text, x24 y88 w90 h23 +0x200, Selected Custom
-Gui Add, Text, x176 y192 w120 h23 +0x200 +Center, Time Elapsed:
-Gui Add, GroupBox, x360 y40 w120 h201, Config
-Gui Add, Progress, x176 y144 w120 h20 -Smooth, 0
-Gui Add, Text, x176 y120 w120 h23 +0x200 +Center, Progress
-Gui Add, Text, x376 y56 w90 h23 +0x200 +Center, Set Goal Amount
-Gui Add, Edit, x376 y80 w90 h23
-Gui Add, Button, x376 y104 w90 h23, &Set
-Gui Add, Text, x376 y136 w90 h23 +0x200, After:
-Gui Add, DropDownList, x376 y160 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
-Gui Add, DropDownList, x376 y208 w90, variables|will|go|here
-Gui Add, Text, x376 y184 w90 h23 +0x200 +Center, Preset:
-Gui Add, Text, x24 y176 w90 h23 +0x200 +Center, Selected Preset
+Gui Add, Button, x30 y40 w90 h23, New/Overwrite
+Gui Add, GroupBox, x14 y24 w122 h108, Custom
+Gui Add, DropDownList, x30 y96 w90, variables|will|go|here
+Gui Add, DropDownList, x186 y65 w120, variables|will|go|here
+Gui Add, GroupBox, x14 y136 w122 h86, Pre-Mades
+Gui Add, DropDownList, x30 y184 w90, Pre-Made||Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
+Gui Add, GroupBox, x176 y24 w140 h203, Stats
+Gui Add, Text, x186 y145 w120 h23 +0x200 +Center , Goal:
+Gui Add, Text, x186 y193 w120 h23 +0x200 +Center , Amount:
+Gui Add, Text, x186 y41 w120 h23 +0x200 +Center , Selected Preset
+Gui Add, Text, x30 y72 w90 h23 +0x200 , Selected Custom
+Gui Add, Text, x186 y169 w120 h23 +0x200 +Center , Time Elapsed:
+Gui Add, GroupBox, x366 y24 w120 h201, Config
+Gui Add, Progress, x186 y121 w120 h20 -Smooth , 0
+Gui Add, Text, x186 y97 w120 h23 +0x200 +Center , Progress
+Gui Add, Text, x382 y40 w90 h23 +0x200 +Center , Set Goal Amount
+Gui Add, Edit, x382 y64 w90 h23
+Gui Add, Button, x382 y88 w90 h23, &Set
+Gui Add, Text, x382 y120 w90 h23 +0x200 , After:
+Gui Add, DropDownList, x382 y144 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
+Gui Add, DropDownList, x382 y192 w90, variables|will|go|here
+Gui Add, Text, x382 y168 w90 h23 +0x200 +Center , Preset:
+Gui Add, Text, x30 y160 w90 h23 +0x200 +Center , Selected Preset
 
 ;PLANTERS TAB
 ;------------------------
