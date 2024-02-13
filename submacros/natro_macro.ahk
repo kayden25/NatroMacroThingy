@@ -2719,29 +2719,31 @@ Gui, Font, s8 cDefault Norm, Tahoma
 Gui, Tab, Presets
 
 Gui Font, s9, Segoe UI
-Gui Add, Button, x30 y40 w90 h23, New/Overwrite
-Gui Add, GroupBox, x14 y24 w122 h108, Custom
-Gui Add, DropDownList, x30 y96 w90, variables|will|go|here
-Gui Add, DropDownList, x186 y65 w120, variables|will|go|here
-Gui Add, GroupBox, x14 y136 w122 h86, Pre-Mades
-Gui Add, DropDownList, x27 y192 w90, Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
-Gui Add, GroupBox, x176 y24 w140 h203, Stats
-Gui Add, Text, x186 y145 w120 h23 +0x200 +Center , Goal:
-Gui Add, Text, x186 y193 w120 h23 +0x200 +Center , Amount:
-Gui Add, Text, x186 y41 w120 h23 +0x200 +Center , Selected Preset
-Gui Add, Text, x30 y72 w90 h23 +0x200 , Selected Custom
-Gui Add, Text, x186 y169 w120 h23 +0x200 +Center , Time Elapsed:
+Gui Add, Button, x24 y40 w90 h23, New/Overwrite
+Gui Add, GroupBox, x8 y24 w118 h120, Custom
+Gui Add, DropDownList, x24 y88 w90, variables|will|go|here
+Gui Add, DropDownList, x190 y65 w120, variables|will|go|here
+Gui Add, GroupBox, x9 y152 w117 h86, Pre-Mades
+Gui Add, DropDownList, x24 y208 w90, Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
+Gui Add, GroupBox, x176 y24 w140 h180, Stats
+Gui Add, Text, x190 y136 w120 h23 +0x200 +Center  , Goal:
+Gui Add, Text, x190 y168 w120 h23 +0x200 +Center  , Amount:
+Gui Add, Text, x190 y41 w120 h23 +0x200 +Center  , Selected Preset
+Gui Add, Text, x24 y64 w90 h23 +0x200  , Selected Custom
+Gui Add, Text, x190 y152 w120 h23 +0x200 +Center  , Time Elapsed:
 Gui Add, GroupBox, x366 y24 w120 h201, Config
-Gui Add, Progress, x186 y121 w120 h20 -Smooth , 0
-Gui Add, Text, x186 y97 w120 h23 +0x200 +Center , Progress
-Gui Add, Text, x382 y40 w90 h23 +0x200 +Center , Set Goal Amount
+Gui Add, Progress, x190 y121 w120 h20 -Smooth  , 0
+Gui Add, Text, x190 y97 w120 h23 +0x200 +Center  , Progress
+Gui Add, Text, x382 y40 w90 h23 +0x200 +Center  , Set Goal Amount
 Gui Add, Edit, x382 y64 w90 h23
 Gui Add, Button, x382 y88 w90 h23, &Set
-Gui Add, Text, x382 y120 w90 h23 +0x200 , After:
+Gui Add, Text, x382 y120 w90 h23 +0x200  , After:
 Gui Add, DropDownList, x382 y144 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
 Gui Add, DropDownList, x382 y192 w90, variables|will|go|here
-Gui Add, Text, x382 y168 w90 h23 +0x200 +Center , Preset:
-Gui Add, Text, x27 y160 w90 h23 +0x200 +Center , Selected Pre-Made
+Gui Add, Text, x382 y168 w90 h23 +0x200 +Center  , Preset:
+Gui Add, Text, x24 y176 w90 h23 +0x200 +Center  , Selected Preset
+Gui Add, Button, x192 y208 w112 h23, &RESET ALL PRESETS
+Gui Add, Button, x24 y112 w90 h21, &Delete
 
 ;PLANTERS TAB
 ;------------------------
