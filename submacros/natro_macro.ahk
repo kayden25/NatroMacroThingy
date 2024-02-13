@@ -2712,6 +2712,38 @@ Gui, Add, Text, x333 y159 w158 h78 vRileyQuestProgress, % StrReplace(RileyQuestP
 Gui, Font, w700
 Gui, Font, s8 cDefault Norm, Tahoma
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; PRESET TAB
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Gui, Tab, Presets
+
+Gui Font, s9, Segoe UI
+Gui Add, Text, x0 y0 w500 h25 +0x200 +Center +Border +0x1000, Presets
+Gui Add, Button, x24 y56 w90 h23, New/Overwrite
+Gui Add, GroupBox, x8 y40 w122 h108, Custom
+Gui Add, DropDownList, x24 y112 w90, variables|will|go|here
+Gui Add, DropDownList, x176 y88 w120, variables|will|go|here
+Gui Add, GroupBox, x8 y152 w122 h86, Pre-Mades
+Gui Add, DropDownList, x24 y200 w90, Pre-Made||Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
+Gui Add, GroupBox, x168 y40 w140 h210, Stats
+Gui Add, Text, x176 y168 w120 h23 +0x200 +Center, Goal:
+Gui Add, Text, x176 y216 w120 h23 +0x200 +Center, Amount:
+Gui Add, Text, x176 y64 w120 h23 +0x200 +Center, Selected Preset
+Gui Add, Text, x24 y88 w90 h23 +0x200, Selected Custom
+Gui Add, Text, x176 y192 w120 h23 +0x200 +Center, Time Elapsed:
+Gui Add, GroupBox, x360 y40 w120 h201, Config
+Gui Add, Progress, x176 y144 w120 h20 -Smooth, 0
+Gui Add, Text, x176 y120 w120 h23 +0x200 +Center, Progress
+Gui Add, Text, x376 y56 w90 h23 +0x200 +Center, Set Goal Amount
+Gui Add, Edit, x376 y80 w90 h23
+Gui Add, Button, x376 y104 w90 h23, &Set
+Gui Add, Text, x376 y136 w90 h23 +0x200, After:
+Gui Add, DropDownList, x376 y160 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
+Gui Add, DropDownList, x376 y208 w90, variables|will|go|here
+Gui Add, Text, x376 y184 w90 h23 +0x200 +Center, Preset:
+Gui Add, Text, x24 y176 w90 h23 +0x200 +Center, Selected Preset
+
 ;PLANTERS TAB
 ;------------------------
 Gui, Tab, Planters
