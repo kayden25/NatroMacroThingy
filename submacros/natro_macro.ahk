@@ -2724,7 +2724,7 @@ Gui Add, GroupBox, x14 y24 w122 h108, Custom
 Gui Add, DropDownList, x30 y96 w90, variables|will|go|here
 Gui Add, DropDownList, x186 y65 w120, variables|will|go|here
 Gui Add, GroupBox, x14 y136 w122 h86, Pre-Mades
-Gui Add, DropDownList, x30 y184 w90, Pre-Made||Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
+Gui Add, DropDownList, x27 y192 w90, Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
 Gui Add, GroupBox, x176 y24 w140 h203, Stats
 Gui Add, Text, x186 y145 w120 h23 +0x200 +Center , Goal:
 Gui Add, Text, x186 y193 w120 h23 +0x200 +Center , Amount:
@@ -2741,7 +2741,7 @@ Gui Add, Text, x382 y120 w90 h23 +0x200 , After:
 Gui Add, DropDownList, x382 y144 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
 Gui Add, DropDownList, x382 y192 w90, variables|will|go|here
 Gui Add, Text, x382 y168 w90 h23 +0x200 +Center , Preset:
-Gui Add, Text, x30 y160 w90 h23 +0x200 +Center , Selected Preset
+Gui Add, Text, x27 y160 w90 h23 +0x200 +Center , Selected Pre-Made
 
 ;PLANTERS TAB
 ;------------------------
