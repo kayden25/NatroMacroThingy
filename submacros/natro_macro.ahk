@@ -21792,7 +21792,9 @@ Gui, 2:Add, Tab, x10 y10 w300 h200, New/Delete|Stats/Settings
 
 selPreset := New
 
-Gui 2:Show,, Preset Settings
+WinGetPos, gx, gy, gw, gh, Natro Macro
+
+Gui 2:Show, % "x" gx+85 " y" gy+35 , Preset Settings
     
 Gui, 2:Tab, New/Delete
 
