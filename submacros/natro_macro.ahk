@@ -2310,8 +2310,9 @@ Gui, Add, Edit, x33 y141 w18 h16 Limit2 number +BackgroundTrans vConvertDelay gn
 Gui, Add, Text, x54 y142 w110 +left +BackgroundTrans,seconds after convert
 
 ;reset settings
-Gui, Add, Button, x20 y183 w130 h22 vResetFieldDefaultsButton gnm_ResetFieldDefaultGUI Disabled, Reset Field Defaults
-Gui, Add, Button, x20 y207 w130 h22 vResetAllButton gnm_ResetConfig Disabled, Reset All Settings
+Gui Add, Button, vResetFieldDefaultsButton gnm_ResetFieldDefaultGUI x21 y180 w130 h16 Disabled , Reset Field Defaults
+Gui Add, Button, vResetAllButton gnm_ResetConfig x21 y197 w130 h16 Disabled , Reset All Settings
+Gui Add, Button, x21 y214 w130 h16 gshowPresetGUI, Preset Settings
 
 ;input settings
 Gui, Add, Text, x176 y40 w100 +left +BackgroundTrans,Add Key Delay (ms):
@@ -21829,47 +21830,39 @@ return
 
 showPresetGUI:
 Gui, New
-Gui, Add, Tab, x10 y10 w300 h200, Selection|Creation|Deletion|Modification|Stats|Settings
-Gui, Show
-    
-Gui, Tab, Selection
+Gui, Add, Tab, x10 y10 w300 h200, New/Delete|Stats/Settings
 
-selCus := 0
-selPremade := 0
-selPreset := 0
-goalProgress := 0
-goal := 0
-timeElapsed := 0
-amount := 0
-doAfter := 0
-presetAfter := 0
+selPreset := New
+
+Gui Show,, Preset Settings
+    
+Gui, Tab, New/Delete
 
 Gui Font, s9, Segoe UI
-Gui, Add, Button, x24 y40 w90 h23, New/Overwrite
-Gui Add, GroupBox, x8 y24 w118 h120, Custom
-Gui Add, DropDownList, x24 y88 w90, variables|will|go|here
-Gui Add, DropDownList, x190 y65 w120, variables|will|go|here
-Gui Add, GroupBox, x9 y152 w117 h86, Pre-Mades
-Gui Add, DropDownList, x24 y208 w90, Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
-Gui Add, GroupBox, x176 y24 w140 h180, Stats
-Gui Add, Text, x190 y136 w120 h23 +0x200 +Center  , Goal:
-Gui Add, Text, x190 y168 w120 h23 +0x200 +Center  , Amount:
-Gui Add, Text, x190 y41 w120 h23 +0x200 +Center  , Selected Preset
-Gui Add, Text, x24 y64 w90 h23 +0x200  , Selected Custom
-Gui Add, Text, x190 y152 w120 h23 +0x200 +Center  , Time Elapsed:
-Gui Add, GroupBox, x366 y24 w120 h201, Config
-Gui Add, Progress, x190 y121 w120 h20 -Smooth  , 0
-Gui Add, Text, x190 y97 w120 h23 +0x200 +Center  , Progress
-Gui Add, Text, x382 y40 w90 h23 +0x200 +Center  , Set Goal Amount
-Gui Add, Edit, x382 y64 w90 h23
-Gui Add, Button, x382 y88 w90 h23, Set
-Gui Add, Text, x382 y120 w90 h23 +0x200  , After:
-Gui Add, DropDownList, x382 y144 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
-Gui Add, DropDownList, x382 y192 w90, variables|will|go|here
-Gui Add, Text, x382 y168 w90 h23 +0x200 +Center  , Preset:
-Gui Add, Text, x24 y176 w90 h23 +0x200 +Center  , Selected Preset
-Gui Add, Button, x192 y208 w112 h23, &RESET ALL PRESETS
-Gui Add, Button, x24 y112 w90 h21, &Delete
+Gui Add, Button, x105 y56 w90 h23, New/Overwrite
+Gui Add, Text, x105 y80 w90 h23 +0x200 +Center +Border, Selected
+Gui Add, Button, x105 y122 w90 h21, &Delete
+Gui Add, Text, x105 y98 w90 h23 +0x200 +Center +Border, selectedPresetHere
+Gui Add, UpDown, x196 y98 w17 h23  -16, 1
+
+Gui, Tab, Stats/Settings
+
+Gui Font, s9, Segoe UI
+Gui Add, DropDownList, x24 y58 w120, variables|will|go|here
+Gui Add, Text, x24 y130 w120 h23 +0x200 +Center     , Goal:
+Gui Add, Text, x24 y162 w120 h23 +0x200 +Center     , Amount:
+Gui Add, Text, x24 y34 w120 h23 +0x200 +Center     , Selected Preset
+Gui Add, Text, x24 y146 w120 h23 +0x200 +Center     , Time Elapsed:
+Gui Add, Progress, x24 y114 w120 h20 -Smooth     , 0
+Gui Add, Text, x24 y90 w120 h23 +0x200 +Center     , Progress
+Gui Add, Text, x182 y37 w90 h20 +0x200 +Center     , Set Goal Amount
+Gui Add, Edit, x182 y61 w90 h20
+Gui Add, Button, x182 y81 w90 h20, Set
+Gui Add, Text, x182 y107 w90 h12 +0x200 +Center , After:
+Gui Add, DropDownList, x182 y120 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
+Gui Add, DropDownList, x181 y160 w90, variables|will|go|here
+Gui Add, Text, x182 y147 w90 h12 +0x200 +Center, Preset:
+Gui Add, Button, x170 y184 w112 h23, &RESET ALL PRESETS
 return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
