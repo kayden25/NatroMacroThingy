@@ -2043,7 +2043,7 @@ Gui, Add, Button, x75 y260 w65 h20 -Wrap vPauseButton gnm_PauseButton Disabled, 
 Gui, Add, Button, x145 y260 w65 h20 -Wrap vStopButton gnm_StopButton Disabled, % " Stop (" StopHotkey ")"
 #include *i %A_ScriptDir%\..\settings\personal.ahk
 ;add tabs
-Gui, Add, Tab, x0 y-1 w500 h240 -Wrap hwndhTab vTab gnm_TabSelect, % "Gather|Collect/Kill|Boost|Quest|Planters|Presets|Status|Settings|Misc|Credits" ((BuffDetectReset = 1) ? "|Advanced" : "")
+Gui, Add, Tab, x0 y-1 w500 h240 -Wrap hwndhTab vTab gnm_TabSelect, % "Gather|Collect/Kill|Boost|Quest|Planters|Status|Settings|Misc|Credits" ((BuffDetectReset = 1) ? "|Advanced" : "")
 SendMessage, 0x1331, 0, 20, , ahk_id %hTab% ; set minimum tab width
 ;check for update
 try AsyncHttpRequest("GET", "https://api.github.com/repos/NatroTeam/NatroMacro/releases/latest", "nm_AutoUpdateHandler", {"accept": "application/vnd.github+json"})
@@ -2711,39 +2711,6 @@ Gui, Add, Checkbox, x340 y145 vRileyQuestGatherInterruptCheck gnm_RileyQuestChec
 Gui, Add, Text, x333 y159 w158 h78 vRileyQuestProgress, % StrReplace(RileyQuestProgress, "|", "`n")
 Gui, Font, w700
 Gui, Font, s8 cDefault Norm, Tahoma
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; PRESET TAB
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-Gui, Tab, Presets
-
-Gui Font, s9, Segoe UI
-Gui Add, Button, x24 y40 w90 h23 gnm_CreatePreset, New/Overwrite
-Gui Add, GroupBox, x8 y24 w118 h120, Custom
-Gui Add, DropDownList, x24 y88 w90, variables|will|go|here
-Gui Add, DropDownList, x190 y65 w120, variables|will|go|here
-Gui Add, GroupBox, x9 y152 w117 h86, Pre-Mades
-Gui Add, DropDownList, x24 y208 w90, Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
-Gui Add, GroupBox, x176 y24 w140 h180, Stats
-Gui Add, Text, x190 y136 w120 h23 +0x200 +Center  , Goal:
-Gui Add, Text, x190 y168 w120 h23 +0x200 +Center  , Amount:
-Gui Add, Text, x190 y41 w120 h23 +0x200 +Center  , Selected Preset
-Gui Add, Text, x24 y64 w90 h23 +0x200  , Selected Custom
-Gui Add, Text, x190 y152 w120 h23 +0x200 +Center  , Time Elapsed:
-Gui Add, GroupBox, x366 y24 w120 h201, Config
-Gui Add, Progress, x190 y121 w120 h20 -Smooth  , 0
-Gui Add, Text, x190 y97 w120 h23 +0x200 +Center  , Progress
-Gui Add, Text, x382 y40 w90 h23 +0x200 +Center  , Set Goal Amount
-Gui Add, Edit, x382 y64 w90 h23
-Gui Add, Button, x382 y88 w90 h23, &Set
-Gui Add, Text, x382 y120 w90 h23 +0x200  , After:
-Gui Add, DropDownList, x382 y144 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
-Gui Add, DropDownList, x382 y192 w90, variables|will|go|here
-Gui Add, Text, x382 y168 w90 h23 +0x200 +Center  , Preset:
-Gui Add, Text, x24 y176 w90 h23 +0x200 +Center  , Selected Preset
-Gui Add, Button, x192 y208 w112 h23, &RESET ALL PRESETS
-Gui Add, Button, x24 y112 w90 h21 gnm_DeletePreset, &Delete
 
 ;PLANTERS TAB
 ;------------------------
@@ -21837,6 +21804,51 @@ if(state="Gathering" || state="Searching" || (VBState=2 && state="Attacking"))
 	nm_bugDeathCheck()
 ;stats
 nm_setStats()
+return
+
+showPresetGUI:
+Gui, New
+Gui, Add, Tab, x10 y10 w300 h200, Selection|Creation|Deletion|Modification|Stats|Settings
+Gui, Show
+    
+Gui, Tab, Selection
+
+selCus := 0
+selPremade := 0
+selPreset := 0
+goalProgress := 0
+goal := 0
+timeElapsed := 0
+amount := 0
+doAfter := 0
+presetAfter := 0
+
+Gui Font, s9, Segoe UI
+Gui, Add, Button, x24 y40 w90 h23, New/Overwrite
+Gui Add, GroupBox, x8 y24 w118 h120, Custom
+Gui Add, DropDownList, x24 y88 w90, variables|will|go|here
+Gui Add, DropDownList, x190 y65 w120, variables|will|go|here
+Gui Add, GroupBox, x9 y152 w117 h86, Pre-Mades
+Gui Add, DropDownList, x24 y208 w90, Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
+Gui Add, GroupBox, x176 y24 w140 h180, Stats
+Gui Add, Text, x190 y136 w120 h23 +0x200 +Center  , Goal:
+Gui Add, Text, x190 y168 w120 h23 +0x200 +Center  , Amount:
+Gui Add, Text, x190 y41 w120 h23 +0x200 +Center  , Selected Preset
+Gui Add, Text, x24 y64 w90 h23 +0x200  , Selected Custom
+Gui Add, Text, x190 y152 w120 h23 +0x200 +Center  , Time Elapsed:
+Gui Add, GroupBox, x366 y24 w120 h201, Config
+Gui Add, Progress, x190 y121 w120 h20 -Smooth  , 0
+Gui Add, Text, x190 y97 w120 h23 +0x200 +Center  , Progress
+Gui Add, Text, x382 y40 w90 h23 +0x200 +Center  , Set Goal Amount
+Gui Add, Edit, x382 y64 w90 h23
+Gui Add, Button, x382 y88 w90 h23, Set
+Gui Add, Text, x382 y120 w90 h23 +0x200  , After:
+Gui Add, DropDownList, x382 y144 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
+Gui Add, DropDownList, x382 y192 w90, variables|will|go|here
+Gui Add, Text, x382 y168 w90 h23 +0x200 +Center  , Preset:
+Gui Add, Text, x24 y176 w90 h23 +0x200 +Center  , Selected Preset
+Gui Add, Button, x192 y208 w112 h23, &RESET ALL PRESETS
+Gui Add, Button, x24 y112 w90 h21, &Delete
 return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
