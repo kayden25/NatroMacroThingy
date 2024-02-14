@@ -1750,6 +1750,11 @@ global PopStarActive:=0
 global PreviousAction:="None"
 global CurrentAction:="Startup"
 fieldnamelist := "|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower|"
+global presetlist := "|"
+Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
+	{
+		presetlist .= A_LoopFileName . "|"
+	}
 hotbarwhilelist := "|Never|Always|At Hive|Gathering|Attacking|Microconverter|Whirligig|Enzymes|GatherStart|Snowflake|"
 sprinklerImages := ["saturator"]
 state:="Startup"
@@ -2721,7 +2726,7 @@ Gui, Tab, Presets
 Gui Font, s9, Segoe UI
 Gui Add, Button, x24 y40 w90 h23 gnm_CreatePreset, New/Overwrite
 Gui Add, GroupBox, x8 y24 w118 h120, Custom
-Gui Add, DropDownList, x24 y88 w90, variables|will|go|here
+Gui Add, DropDownList, x24 y88 w90 vPresetName, %presetlist%
 Gui Add, DropDownList, x190 y65 w120, variables|will|go|here
 Gui Add, GroupBox, x9 y152 w117 h86, Pre-Mades
 Gui Add, DropDownList, x24 y208 w90, Honey|Tickets|All Loot|All Treats|Strawberries|Blueberries|Pineapple|Treats
@@ -4122,9 +4127,19 @@ nm_CreatePreset(PresetName) {
 		ini .= "`r`n"
 	}
 	FileAppend, %ini%, %A_WorkingDir%\settings\presets\%PresetName%\manual_planters.ini
+	presetlist := "|"
+	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
+		{
+			presetlist .= A_LoopFileName . "|"
+		}
+	GuiControl,, PresetName, %presetlist%
 }
-nm_DeletePreset(PresetName) {
-	PresetName := "Test_Preset"
+nm_DeletePreset() {
+	GuiControlGet, PresetName
+	if (PresetName="") {
+		MsgBox ,,, No preset found., 5
+		return
+	}
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
 	if (!FileExist(PresetPath)) {
 		MsgBox ,,, Preset %PresetName% not found., 5
@@ -4134,6 +4149,12 @@ nm_DeletePreset(PresetName) {
 	IfMsgBox no
 		return
 	FileRemoveDir, %A_WorkingDir%\settings\presets\%PresetName%, 1
+	presetlist := "|"
+	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
+		{
+			presetlist .= A_LoopFileName . "|"
+		}
+	GuiControl,, PresetName, %presetlist%
 }
 nm_showAdvancedSettings(){
 	global BuffDetectReset
