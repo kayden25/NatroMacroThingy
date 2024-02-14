@@ -284,7 +284,7 @@ nm_import() ; import patterns
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; SET CONFIG
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-config := {} ; store default values, these are loaded initially
+global config := {} ; store default values, these are loaded initially
 
 config["Gui"] := {"dayOrNight":"Day"
 	, "PlanterMode":0
@@ -1581,7 +1581,7 @@ FileAppend, %ini%, %A_WorkingDir%\settings\field_config.ini
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; MANUAL PLANTERS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-ManualPlanters := {}
+global ManualPlanters := {}
 
 ManualPlanters["General"] := {"MHarvestInterval":"2 hours"}
 
@@ -2719,7 +2719,7 @@ Gui, Font, s8 cDefault Norm, Tahoma
 Gui, Tab, Presets
 
 Gui Font, s9, Segoe UI
-Gui Add, Button, x24 y40 w90 h23, New/Overwrite
+Gui Add, Button, x24 y40 w90 h23 gnm_CreatePreset, New/Overwrite
 Gui Add, GroupBox, x8 y24 w118 h120, Custom
 Gui Add, DropDownList, x24 y88 w90, variables|will|go|here
 Gui Add, DropDownList, x190 y65 w120, variables|will|go|here
@@ -2743,7 +2743,7 @@ Gui Add, DropDownList, x382 y192 w90, variables|will|go|here
 Gui Add, Text, x382 y168 w90 h23 +0x200 +Center  , Preset:
 Gui Add, Text, x24 y176 w90 h23 +0x200 +Center  , Selected Preset
 Gui Add, Button, x192 y208 w112 h23, &RESET ALL PRESETS
-Gui Add, Button, x24 y112 w90 h21, &Delete
+Gui Add, Button, x24 y112 w90 h21 gnm_DeletePreset, &Delete
 
 ;PLANTERS TAB
 ;------------------------
@@ -4047,6 +4047,93 @@ nm_WebhookEasterEgg(){
 		DetectHiddenWindows %Prev_DetectHiddenWindows%
 		SetTitleMatchMode %Prev_TitleMatchMode%
 	}
+}
+nm_CreatePreset(PresetName) {
+	global config, FieldDefault, ManualPlanters
+	PresetName := "Test_Preset"
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+	if (!FileExist(A_WorkingDir "\settings\presets")) {
+		FileCreateDir, %A_WorkingDir%\settings\presets
+	}
+	if (FileExist(PresetPath)) {
+		MsgBox , 4,,Do you want to overwrite %PresetName%?
+		IfMsgBox no
+			return
+		FileRemoveDir, %A_WorkingDir%\settings\presets\%PresetName%, 1
+	}
+	FileCreateDir, %A_WorkingDir%\settings\presets\%PresetName%
+	for k,v in config ; load the default values as globals, will be overwritten if a new value exists when reading
+		for i,j in v
+			%i% := j
+	
+	if FileExist(A_WorkingDir "\settings\nm_config.ini") ; update default values with new ones read from any existing .ini
+		nm_ReadIni(A_WorkingDir "\settings\nm_config.ini")
+	
+	ini := ""
+	for k,v in config ; overwrite any existing .ini with updated one with all new keys and old values
+	{
+		ini .= "[" k "]`r`n"
+		for i in v
+			ini .= i "=" %i% "`r`n"
+		ini .= "`r`n"
+	}
+	FileAppend, %ini%, %A_WorkingDir%\settings\presets\%PresetName%\nm_config.ini
+	
+	ini := ""
+	for k,v in FieldDefault ; overwrite any existing .ini with updated one with all new keys and old values
+	{
+		ini .= "[" k "]`r`n"
+		for i,j in v
+			ini .= i "=" j "`r`n"
+		ini .= "`r`n"
+	}
+	FileAppend, %ini%, %A_WorkingDir%\settings\presets\%PresetName%\field_config.ini
+
+	for k,v in ManualPlanters ; load the default values as globals, will be overwritten if a new value exists when reading
+		for i,j in v
+			%i% := j
+
+	if FileExist(A_WorkingDir "\settings\manual_planters.ini") { ; update default values with new ones read from any existing .ini
+		nm_ReadIni(A_WorkingDir "\settings\manual_planters.ini")
+		; replace if imported settings from previous version
+		; Every 30 Minutes|Every Hour|Every 2 Hours|Every 3 Hours|Every 4 Hours|Every 5 Hours|Every 6 Hours
+		if (MHarvestInterval = "Every 30 Minutes") 
+			MHarvestInterval := "30 mins"
+		if (MHarvestInterval = "Every Hour") 
+			MHarvestInterval := "1 hour"
+		if (MHarvestInterval = "Every 2 Hours") 
+			MHarvestInterval := "2 hours"
+		if (MHarvestInterval = "Every 3 Hours" )
+			MHarvestInterval := "3 hours"
+		if (MHarvestInterval = "Every 4 Hours") 
+			MHarvestInterval := "4 hours"
+		if (MHarvestInterval = "Every 5 Hours") 
+			MHarvestInterval := "5 hours"
+		if (MHarvestInterval = "Every 6 Hours") 
+			MHarvestInterval := "6 hours"
+		}
+
+	ini := ""
+	for k,v in ManualPlanters ; overwrite any existing .ini with updated one with all new keys and old values
+	{
+		ini .= "[" k "]`r`n"
+		for i in v
+			ini .= i "=" %i% "`r`n"
+		ini .= "`r`n"
+	}
+	FileAppend, %ini%, %A_WorkingDir%\settings\presets\%PresetName%\manual_planters.ini
+}
+nm_DeletePreset(PresetName) {
+	PresetName := "Test_Preset"
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+	if (!FileExist(PresetPath)) {
+		MsgBox ,,, Preset %PresetName% not found., 5
+		return
+	}
+	MsgBox , 4,, Do you want to delete %PresetName%?
+	IfMsgBox no
+		return
+	FileRemoveDir, %A_WorkingDir%\settings\presets\%PresetName%, 1
 }
 nm_showAdvancedSettings(){
 	global BuffDetectReset
