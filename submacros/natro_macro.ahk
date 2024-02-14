@@ -4095,15 +4095,18 @@ nm_CreatePreset(PresetName) {
 		ini .= "`r`n"
 	}
 	FileAppend, %ini%, %A_WorkingDir%\settings\presets\%PresetName%\manual_planters.ini
-presetlist := "|"
+	presetlist := "|"
 	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
 		{
 			presetlist .= A_LoopFileName . "|"
 		}
-	GuiControl,, PresetName, %presetlist%
+	GuiControl,, PresetSelect, %presetlist%
+	GuiControl,, PresetAfter, %presetlist%
+	GuiControl,, PresetDCSelect, %presetlist%
 }
 nm_DeletePreset() {
-	GuiControlGet, PresetName
+	GuiControlGet, DCPreset
+	PresetName := DCPreset
 	if (PresetName="") {
 		MsgBox ,,, No preset found., 5
 		return
@@ -4122,7 +4125,9 @@ presetlist := "|"
 		{
 			presetlist .= A_LoopFileName . "|"
 		}
-	GuiControl,, PresetName, %presetlist%
+	GuiControl,, PresetSelect, %presetlist%
+	GuiControl,, PresetAfter, %presetlist%
+	GuiControl,, PresetDCSelect, %presetlist%
 }
 nm_showAdvancedSettings(){
 	global BuffDetectReset
@@ -21839,16 +21844,16 @@ Gui Show,, Preset Settings
 Gui, Tab, New/Delete
 
 Gui Font, s9, Segoe UI
-Gui Add, Button, x105 y56 w90 h23, New/Overwrite
+Gui Add, Button, x105 y56 w90 h23 gnm_CreatePreset, New/Overwrite
 Gui Add, Text, x105 y80 w90 h23 +0x200 +Center +Border, Selected
-Gui Add, Button, x105 y122 w90 h21, &Delete
-Gui Add, Text, x105 y98 w90 h23 +0x200 +Center +Border, selectedPresetHere
-Gui Add, UpDown, x196 y98 w17 h23  -16, 1
+Gui Add, Button, x105 y122 w90 h21 gnm_DeletePreset, &Delete
+Gui Add, Text, x105 y98 w90 h23 +0x200 +Center +Border vPresetDCSelect, %presetlist%
+Gui Add, UpDown, x196 y98 w17 h23 -16 vDCPreset, 1
 
 Gui, Tab, Stats/Settings
 
 Gui Font, s9, Segoe UI
-Gui Add, DropDownList, x24 y58 w120, variables|will|go|here
+Gui Add, DropDownList, x24 y58 w120 choose1 vPresetSelect, %presetlist%
 Gui Add, Text, x24 y130 w120 h23 +0x200 +Center     , Goal:
 Gui Add, Text, x24 y162 w120 h23 +0x200 +Center     , Amount:
 Gui Add, Text, x24 y34 w120 h23 +0x200 +Center     , Selected Preset
@@ -21860,7 +21865,7 @@ Gui Add, Edit, x182 y61 w90 h20
 Gui Add, Button, x182 y81 w90 h20, Set
 Gui Add, Text, x182 y107 w90 h12 +0x200 +Center , After:
 Gui Add, DropDownList, x182 y120 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
-Gui Add, DropDownList, x181 y160 w90, variables|will|go|here
+Gui Add, DropDownList, x181 y160 w90 choose1 vPresetAfter, %presetlist%
 Gui Add, Text, x182 y147 w90 h12 +0x200 +Center, Preset:
 Gui Add, Button, x170 y184 w112 h23, &RESET ALL PRESETS
 return
