@@ -1750,10 +1750,12 @@ global PopStarActive:=0
 global PreviousAction:="None"
 global CurrentAction:="Startup"
 fieldnamelist := "|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower|"
-global presetlist := "|"
+global presetlist := "default|"
 Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
 	{
-		presetlist .= A_LoopFileName . "|"
+		if (A_LoopFileName!="") {
+			presetlist .= A_LoopFileName . "|"
+		}
 	}
 hotbarwhilelist := "|Never|Always|At Hive|Gathering|Attacking|Microconverter|Whirligig|Enzymes|GatherStart|Snowflake|"
 sprinklerImages := ["saturator"]
@@ -4095,10 +4097,12 @@ nm_CreatePreset(PresetName) {
 		ini .= "`r`n"
 	}
 	FileAppend, %ini%, %A_WorkingDir%\settings\presets\%PresetName%\manual_planters.ini
-	presetlist := "|"
+	presetlist := "|default|"
 	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
 		{
-			presetlist .= A_LoopFileName . "|"
+			if (A_LoopFileName!="") {
+				presetlist .= A_LoopFileName . "|"
+			}
 		}
 	GuiControl,, PresetSelect, %presetlist%
 	GuiControl,, PresetAfter, %presetlist%
@@ -4111,6 +4115,10 @@ nm_DeletePreset() {
 		MsgBox ,,, No preset found., 5
 		return
 	}
+	else if (PresetName="default") {
+		MsgBox ,,, You can't delete default preset., 5
+		return
+	}
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
 	if (!FileExist(PresetPath)) {
 		MsgBox ,,, Preset %PresetName% not found., 5
@@ -4120,10 +4128,12 @@ nm_DeletePreset() {
 	IfMsgBox no
 		return
 	FileRemoveDir, %A_WorkingDir%\settings\presets\%PresetName%, 1
-presetlist := "|"
+	presetlist := "|default|"
 	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
 		{
-			presetlist .= A_LoopFileName . "|"
+			if (A_LoopFileName!="") {
+				presetlist .= A_LoopFileName . "|"
+			}
 		}
 	GuiControl,, PresetSelect, %presetlist%
 	GuiControl,, PresetAfter, %presetlist%
@@ -21834,40 +21844,40 @@ nm_setStats()
 return
 
 showPresetGUI:
-Gui, New
-Gui, Add, Tab, x10 y10 w300 h200, New/Delete|Stats/Settings
+Gui, 2:New
+Gui, 2:Add, Tab, x10 y10 w300 h200, New/Delete|Stats/Settings
 
 selPreset := New
 
-Gui Show,, Preset Settings
+Gui 2:Show,, Preset Settings
     
-Gui, Tab, New/Delete
+Gui, 2:Tab, New/Delete
 
-Gui Font, s9, Segoe UI
-Gui Add, Button, x105 y56 w90 h23 gnm_CreatePreset, New/Overwrite
-Gui Add, Text, x105 y80 w90 h23 +0x200 +Center +Border, Selected
-Gui Add, Button, x105 y122 w90 h21 gnm_DeletePreset, &Delete
-Gui Add, Text, x105 y98 w90 h23 +0x200 +Center +Border vPresetDCSelect, %presetlist%
-Gui Add, UpDown, x196 y98 w17 h23 -16 vDCPreset, 1
+Gui 2:Font, s9, Segoe UI
+Gui 2:Add, Button, x105 y56 w90 h23 gnm_CreatePreset, New/Overwrite
+Gui 2:Add, Text, x105 y80 w90 h23 +0x200 +Center +Border, Selected
+Gui 2:Add, Button, x105 y122 w90 h21 gnm_DeletePreset, &Delete
+Gui 2:Add, Text, x105 y98 w90 h23 +0x200 +Center +Border vPresetDCSelect, %presetlist%
+Gui 2:Add, UpDown, x196 y98 w17 h23 -16 vDCPreset, 1
 
-Gui, Tab, Stats/Settings
+Gui, 2:Tab, Stats/Settings
 
-Gui Font, s9, Segoe UI
-Gui Add, DropDownList, x24 y58 w120 choose1 vPresetSelect, %presetlist%
-Gui Add, Text, x24 y130 w120 h23 +0x200 +Center     , Goal:
-Gui Add, Text, x24 y162 w120 h23 +0x200 +Center     , Amount:
-Gui Add, Text, x24 y34 w120 h23 +0x200 +Center     , Selected Preset
-Gui Add, Text, x24 y146 w120 h23 +0x200 +Center     , Time Elapsed:
-Gui Add, Progress, x24 y114 w120 h20 -Smooth     , 0
-Gui Add, Text, x24 y90 w120 h23 +0x200 +Center     , Progress
-Gui Add, Text, x182 y37 w90 h20 +0x200 +Center     , Set Goal Amount
-Gui Add, Edit, x182 y61 w90 h20
-Gui Add, Button, x182 y81 w90 h20, Set
-Gui Add, Text, x182 y107 w90 h12 +0x200 +Center , After:
-Gui Add, DropDownList, x182 y120 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
-Gui Add, DropDownList, x181 y160 w90 choose1 vPresetAfter, %presetlist%
-Gui Add, Text, x182 y147 w90 h12 +0x200 +Center, Preset:
-Gui Add, Button, x170 y184 w112 h23, &RESET ALL PRESETS
+Gui 2:Font, s9, Segoe UI
+Gui 2:Add, DropDownList, x24 y58 w120 choose1 vPresetSelect, %presetlist%
+Gui 2:Add, Text, x24 y130 w120 h23 +0x200 +Center     , Goal:
+Gui 2:Add, Text, x24 y162 w120 h23 +0x200 +Center     , Amount:
+Gui 2:Add, Text, x24 y34 w120 h23 +0x200 +Center     , Selected Preset
+Gui 2:Add, Text, x24 y146 w120 h23 +0x200 +Center     , Time Elapsed:
+Gui 2:Add, Progress, x24 y114 w120 h20 -Smooth     , 0
+Gui 2:Add, Text, x24 y90 w120 h23 +0x200 +Center     , Progress
+Gui 2:Add, Text, x182 y37 w90 h20 +0x200 +Center     , Set Goal Amount
+Gui 2:Add, Edit, x182 y61 w90 h20
+Gui 2:Add, Button, x182 y81 w90 h20, Set
+Gui 2:Add, Text, x182 y107 w90 h12 +0x200 +Center , After:
+Gui 2:Add, DropDownList, x182 y120 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
+Gui 2:Add, DropDownList, x181 y160 w90 choose1 vPresetAfter, %presetlist%
+Gui 2:Add, Text, x182 y147 w90 h12 +0x200 +Center, Preset:
+Gui 2:Add, Button, x170 y184 w112 h23, &RESET ALL PRESETS
 return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
