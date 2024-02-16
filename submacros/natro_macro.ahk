@@ -284,7 +284,7 @@ nm_import() ; import patterns
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; SET CONFIG
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-global config := {} ; store default values, these are loaded initially
+config := {} ; store default values, these are loaded initially
 
 config["Gui"] := {"dayOrNight":"Day"
 	, "PlanterMode":0
@@ -1581,7 +1581,7 @@ FileAppend, %ini%, %A_WorkingDir%\settings\field_config.ini
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; MANUAL PLANTERS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-global ManualPlanters := {}
+ManualPlanters := {}
 
 ManualPlanters["General"] := {"MHarvestInterval":"2 hours"}
 
@@ -1750,7 +1750,7 @@ global PopStarActive:=0
 global PreviousAction:="None"
 global CurrentAction:="Startup"
 fieldnamelist := "|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower|"
-global presetlist := "default|"
+global presetlist := "|"
 Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
 	{
 		if (A_LoopFileName!="") {
@@ -4048,8 +4048,8 @@ nm_CreatePreset() {
 	PresetName := CreatePreset
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
 	nm_CreatePresetFiles(PresetName)
-	if (PresetName="default") {
-		MsgBox ,,, You can't create the default preset. Use a different name., 5
+	if (PresetName="No Preset") {
+		MsgBox ,,, You can't create no preset. Use a different name., 5
 		return
 	}
 	else if (PresetName="") {
@@ -4066,14 +4066,14 @@ nm_CreatePreset() {
 		nm_CreatePresetFiles(PresetName, 1)
 	}
 
-	presetlist := "|default|"
+	presetlist := "|"
 	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
 		{
 			if (A_LoopFileName!="") {
 				presetlist .= A_LoopFileName . "|"
 			}
 		}
-	GuiControl,, PresetSelect, %presetlist%
+	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_OverwritePreset() {
 	GuiControlGet, PresetSelect
@@ -4081,11 +4081,11 @@ nm_OverwritePreset() {
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
 	nm_CreatePresetFiles(PresetName)
 	if (PresetName="") {
-		MsgBox ,,, No preset found., 5
+		MsgBox ,,, No preset selected., 5
 		return
 	}
-	else if (PresetName="default") {
-		MsgBox ,,, You can't overwrite the default preset., 5
+	else if (PresetName="No Presets") {
+		MsgBox ,,, No presets created., 5
 		return
 	}
 	else if (!FileExist(PresetPath)) {
@@ -4096,14 +4096,14 @@ nm_OverwritePreset() {
 	IfMsgBox no
 		return
 	nm_CreatePresetFiles(PresetName, 3)
-	presetlist := "|default|"
+	presetlist := "|"
 	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
 		{
 			if (A_LoopFileName!="") {
 				presetlist .= A_LoopFileName . "|"
 			}
 		}
-	GuiControl,, PresetSelect, %presetlist%
+	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_DeletePreset() {
 	GuiControlGet, PresetSelect
@@ -4111,11 +4111,11 @@ nm_DeletePreset() {
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
 	nm_CreatePresetFiles(PresetName)
 	if (PresetName="") {
-		MsgBox ,,, No preset found., 5
+		MsgBox ,,, No preset selected., 5
 		return
 	}
-	else if (PresetName="default") {
-		MsgBox ,,, You can't delete the default preset., 5
+	else if (PresetName="No Presets") {
+		MsgBox ,,, No presets created., 5
 		return
 	}
 	if (!FileExist(PresetPath)) {
@@ -4126,14 +4126,42 @@ nm_DeletePreset() {
 	IfMsgBox no
 		return
 	nm_CreatePresetFiles(PresetName, 2)
-	presetlist := "|default|"
+	presetlist := "|"
 	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
 		{
 			if (A_LoopFileName!="") {
 				presetlist .= A_LoopFileName . "|"
 			}
 		}
-	GuiControl,, PresetSelect, %presetlist%
+		GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
+}
+nm_LoadPreset() {
+	GuiControlGet, PresetSelect
+	PresetName := PresetSelect
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+	if (PresetName="") {
+		MsgBox ,,, No preset selected., 5
+		return
+	}
+	else if (PresetName="No Presets") {
+		MsgBox ,,, No presets created., 5
+		return
+	}
+	else if (!FileExist(PresetPath)) {
+		MsgBox ,,, Preset %PresetName% does not exist., 5
+		return
+	}
+	MsgBox , 4,, Do you want to load %PresetName%? Current settings will be lost.
+	IfMsgBox no
+		return
+	if FileExist(PresetPath "\*.ini")
+		FileCopy, %PresetPath%\*.ini, %A_WorkingDir%\settings, 1
+	WinClose, StatMonitor.ahk ahk_class AutoHotkey
+	WinClose, background.ahk ahk_class AutoHotkey
+	WinClose, Status.ahk ahk_class AutoHotkey
+	nm_SaveGui()
+	reload
+	Sleep, 10000
 }
 nm_showAdvancedSettings(){
 	global BuffDetectReset
@@ -21848,9 +21876,9 @@ Gui 2:Font, s9, Segoe UI
 Gui 2:Add, Button, gnm_CreatePreset x13 y28 w90 h23, Create New
 Gui 2:Add, Button, gnm_DeletePreset x196 y52 w90 h21, &Delete
 Gui 2:Add, Button, x196 y5 w90 h23 gnm_OverwritePreset, Overwrite
-Gui 2:Add, Button, x90 y160 w120 h21, Load Preset
+Gui 2:Add, Button, x90 y160 w120 h21 gnm_LoadPreset, Load Preset
 Gui 2:Add, Edit, x13 y5 w90 h23 vCreatePreset
-Gui 2:Add, DropDownList, x105 y5 w90 choose1 vPresetSelect, %presetlist%
+Gui 2:Add, DropDownList, x105 y5 w90 choose1 vPresetSelect, % ((presetlist = "|") ? "No Presets|" : presetlist)
 
 return
 
