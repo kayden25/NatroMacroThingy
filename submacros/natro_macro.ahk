@@ -21840,9 +21840,9 @@ nm_setStats()
 return
 
 showPresetGUI:
-
+WinGetPos, gx, gy, gw, gh, Natro Macro
 Gui, 2:New
-Gui, 2:Show, x100 y100 w300 h200, Preset Settings
+Gui, 2:Show, % "x" gx+85 " y" gy+35 " w300 h200", Preset Settings
 
 Gui 2:Font, s9, Segoe UI
 Gui 2:Add, Button, gnm_CreatePreset x13 y28 w90 h23, Create New
