@@ -21794,13 +21794,13 @@ Gui, Show, x100 y100 w300 h200, Preset Settings
 Gui Font, s9, Segoe UI
 Gui Add, Button, gnm_CreatePreset x13 y28 w90 h23, Create New
 Gui Add, Button, gnm_DeletePreset x196 y52 w90 h21, &Delete
-Gui Add, Text, vPresetDCSelect x196 y28 w90 h23 +0x200 +Center +Border  , %presetlist%
-Gui Add, UpDown, vDCPreset x285 y29 w17 h23 -16  , 1
+Gui Add, Text, vPresetDCSelect x196 y28 w90 h23 +0x200 +Center +Border   , %presetlist%
+Gui Add, UpDown, vDCPreset x285 y29 w17 h23 -16   , 1
 Gui Add, Button, x196 y5 w90 h23, Overwrite
-Gui Add, DropDownList, vPresetSelect x90 y138 w120 choose1  , %presetlist%
-Gui Add, Text, x90 y114 w120 h23 +0x200 +Center       , Selected Preset
 Gui Add, Button, x90 y160 w120 h21, Load Preset
 Gui Add, Edit, x13 y5 w90 h23
+Gui Add, Text, x90 y137 w120 h23 +0x200 +Border +Center, selectedPreset default to saying "Selected Preset"
+Gui Add, UpDown, x210 y137 w17 h23  -16, 1
 
 return
 
