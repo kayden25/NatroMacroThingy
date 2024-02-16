@@ -21787,42 +21787,21 @@ nm_setStats()
 return
 
 showPresetGUI:
-Gui, 2:New
-Gui, 2:Add, Tab, x10 y10 w300 h200, New/Delete|Stats/Settings
 
-selPreset := New
+Gui, New
+Gui, Show, x100 y100 w300 h200, Preset Settings
 
-WinGetPos, gx, gy, gw, gh, Natro Macro
+Gui Font, s9, Segoe UI
+Gui Add, Button, gnm_CreatePreset x13 y28 w90 h23, Create New
+Gui Add, Button, gnm_DeletePreset x196 y52 w90 h21, &Delete
+Gui Add, Text, vPresetDCSelect x196 y28 w90 h23 +0x200 +Center +Border  , %presetlist%
+Gui Add, UpDown, vDCPreset x285 y29 w17 h23 -16  , 1
+Gui Add, Button, x196 y5 w90 h23, Overwrite
+Gui Add, DropDownList, vPresetSelect x90 y138 w120 choose1  , %presetlist%
+Gui Add, Text, x90 y114 w120 h23 +0x200 +Center       , Selected Preset
+Gui Add, Button, x90 y160 w120 h21, Load Preset
+Gui Add, Edit, x13 y5 w90 h23
 
-Gui 2:Show, % "x" gx+85 " y" gy+35 , Preset Settings
-    
-Gui, 2:Tab, New/Delete
-
-Gui 2:Font, s9, Segoe UI
-Gui 2:Add, Button, x105 y56 w90 h23 gnm_CreatePreset, New/Overwrite
-Gui 2:Add, Text, x105 y80 w90 h23 +0x200 +Center +Border, Selected
-Gui 2:Add, Button, x105 y122 w90 h21 gnm_DeletePreset, &Delete
-Gui 2:Add, Text, x105 y98 w90 h23 +0x200 +Center +Border vPresetDCSelect, %presetlist%
-Gui 2:Add, UpDown, x196 y98 w17 h23 -16 vDCPreset, 1
-
-Gui, 2:Tab, Stats/Settings
-
-Gui 2:Font, s9, Segoe UI
-Gui 2:Add, DropDownList, x24 y58 w120 choose1 vPresetSelect, %presetlist%
-Gui 2:Add, Text, x24 y130 w120 h23 +0x200 +Center     , Goal:
-Gui 2:Add, Text, x24 y162 w120 h23 +0x200 +Center     , Amount:
-Gui 2:Add, Text, x24 y34 w120 h23 +0x200 +Center     , Selected Preset
-Gui 2:Add, Text, x24 y146 w120 h23 +0x200 +Center     , Time Elapsed:
-Gui 2:Add, Progress, x24 y114 w120 h20 -Smooth     , 0
-Gui 2:Add, Text, x24 y90 w120 h23 +0x200 +Center     , Progress
-Gui 2:Add, Text, x182 y37 w90 h20 +0x200 +Center     , Set Goal Amount
-Gui 2:Add, Edit, x182 y61 w90 h20
-Gui 2:Add, Button, x182 y81 w90 h20, Set
-Gui 2:Add, Text, x182 y107 w90 h12 +0x200 +Center , After:
-Gui 2:Add, DropDownList, x182 y120 w90, Do Custom|Do Pre-Made|Do Snail|Close Roblox|Shutdown PC
-Gui 2:Add, DropDownList, x181 y160 w90 choose1 vPresetAfter, %presetlist%
-Gui 2:Add, Text, x182 y147 w90 h12 +0x200 +Center, Preset:
-Gui 2:Add, Button, x170 y184 w112 h23, &RESET ALL PRESETS
 return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
