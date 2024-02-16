@@ -4023,22 +4023,48 @@ nm_WebhookEasterEgg(){
 		SetTitleMatchMode %Prev_TitleMatchMode%
 	}
 }
-nm_CreatePreset(PresetName) {
-	PresetName := "Test_Preset"
-	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+nm_CreatePresetFiles(PresetName, type:=0) {
 	if (!FileExist(A_WorkingDir "\settings\presets")) {
 		FileCreateDir, %A_WorkingDir%\settings\presets
 	}
-	if (FileExist(PresetPath)) {
-		MsgBox , 4,,Do you want to overwrite %PresetName%?
+	if (type!=0) {
+		switch type {
+			case 1: 
+				FileCreateDir, %A_WorkingDir%\settings\presets\%PresetName%
+				if FileExist(A_WorkingDir "\settings\*.ini")
+					FileCopy, %A_WorkingDir%\settings\*.ini, %A_WorkingDir%\settings\presets\%PresetName%, 1
+			case 2: 
+				FileRemoveDir, %A_WorkingDir%\settings\presets\%PresetName%, 1
+			case 3: 
+				FileRemoveDir, %A_WorkingDir%\settings\presets\%PresetName%, 1
+				FileCreateDir, %A_WorkingDir%\settings\presets\%PresetName%
+				if FileExist(A_WorkingDir "\settings\*.ini")
+					FileCopy, %A_WorkingDir%\settings\*.ini, %A_WorkingDir%\settings\presets\%PresetName%, 1
+		}
+	}
+}
+nm_CreatePreset() {
+	GuiControlGet, CreatePreset
+	PresetName := CreatePreset
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+	nm_CreatePresetFiles(PresetName)
+	if (PresetName="default") {
+		MsgBox ,,, You can't create the default preset. Use a different name., 5
+		return
+	}
+	else if (PresetName="") {
+		MsgBox ,,, No preset name given., 5
+		return
+	}
+	else if (FileExist(PresetPath)) {
+		MsgBox , 4,,Preset %PresetName% is already created. Do you want to overwrite %PresetName%?
 		IfMsgBox no
 			return
+		nm_CreatePresetFiles(PresetName, 3)
 	}
 	else {
-		FileCreateDir, %A_WorkingDir%\settings\presets\%PresetName%
+		nm_CreatePresetFiles(PresetName, 1)
 	}
-	if FileExist(A_WorkingDir "\settings\*.ini") ; update default values with new ones read from any existing .ini
-		FileCopy, %A_WorkingDir%\settings\*.ini, %A_WorkingDir%\settings\presets\%PresetName%, 1
 
 	presetlist := "|default|"
 	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
@@ -4048,29 +4074,28 @@ nm_CreatePreset(PresetName) {
 			}
 		}
 	GuiControl,, PresetSelect, %presetlist%
-	GuiControl,, PresetAfter, %presetlist%
-	GuiControl,, PresetDCSelect, %presetlist%
 }
-nm_DeletePreset() {
-	GuiControlGet, DCPreset
-	PresetName := DCPreset
+nm_OverwritePreset() {
+	GuiControlGet, PresetSelect
+	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+	nm_CreatePresetFiles(PresetName)
 	if (PresetName="") {
 		MsgBox ,,, No preset found., 5
 		return
 	}
 	else if (PresetName="default") {
-		MsgBox ,,, You can't delete default preset., 5
+		MsgBox ,,, You can't overwrite the default preset., 5
 		return
 	}
-	if (!FileExist(PresetPath)) {
-		MsgBox ,,, Preset %PresetName% not found., 5
+	else if (!FileExist(PresetPath)) {
+		MsgBox ,,, Preset %PresetName% does not exist., 5
 		return
 	}
-	MsgBox , 4,, Do you want to delete %PresetName%?
+	MsgBox , 4,,Do you want to overwrite %PresetName%?
 	IfMsgBox no
 		return
-	FileRemoveDir, %A_WorkingDir%\settings\presets\%PresetName%, 1
+	nm_CreatePresetFiles(PresetName, 3)
 	presetlist := "|default|"
 	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
 		{
@@ -4079,8 +4104,36 @@ nm_DeletePreset() {
 			}
 		}
 	GuiControl,, PresetSelect, %presetlist%
-	GuiControl,, PresetAfter, %presetlist%
-	GuiControl,, PresetDCSelect, %presetlist%
+}
+nm_DeletePreset() {
+	GuiControlGet, PresetSelect
+	PresetName := PresetSelect
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+	nm_CreatePresetFiles(PresetName)
+	if (PresetName="") {
+		MsgBox ,,, No preset found., 5
+		return
+	}
+	else if (PresetName="default") {
+		MsgBox ,,, You can't delete the default preset., 5
+		return
+	}
+	if (!FileExist(PresetPath)) {
+		MsgBox ,,, Preset %PresetName% does not exist., 5
+		return
+	}
+	MsgBox , 4,, Do you want to delete %PresetName%?
+	IfMsgBox no
+		return
+	nm_CreatePresetFiles(PresetName, 2)
+	presetlist := "|default|"
+	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
+		{
+			if (A_LoopFileName!="") {
+				presetlist .= A_LoopFileName . "|"
+			}
+		}
+	GuiControl,, PresetSelect, %presetlist%
 }
 nm_showAdvancedSettings(){
 	global BuffDetectReset
@@ -21788,19 +21841,16 @@ return
 
 showPresetGUI:
 
-Gui, New
-Gui, Show, x100 y100 w300 h200, Preset Settings
+Gui, 2:New
+Gui, 2:Show, x100 y100 w300 h200, Preset Settings
 
-Gui Font, s9, Segoe UI
-Gui Add, Button, gnm_CreatePreset x13 y28 w90 h23, Create New
-Gui Add, Button, gnm_DeletePreset x196 y52 w90 h21, &Delete
-Gui Add, Text, vPresetDCSelect x196 y28 w90 h23 +0x200 +Center +Border   , %presetlist%
-Gui Add, UpDown, vDCPreset x285 y29 w17 h23 -16   , 1
-Gui Add, Button, x196 y5 w90 h23, Overwrite
-Gui Add, Button, x90 y160 w120 h21, Load Preset
-Gui Add, Edit, x13 y5 w90 h23
-Gui Add, Text, x90 y137 w120 h23 +0x200 +Border +Center, selectedPreset default to saying "Selected Preset"
-Gui Add, UpDown, x210 y137 w17 h23  -16, 1
+Gui 2:Font, s9, Segoe UI
+Gui 2:Add, Button, gnm_CreatePreset x13 y28 w90 h23, Create New
+Gui 2:Add, Button, gnm_DeletePreset x196 y52 w90 h21, &Delete
+Gui 2:Add, Button, x196 y5 w90 h23 gnm_OverwritePreset, Overwrite
+Gui 2:Add, Button, x90 y160 w120 h21, Load Preset
+Gui 2:Add, Edit, x13 y5 w90 h23 vCreatePreset
+Gui 2:Add, DropDownList, x105 y5 w90 choose1 vPresetSelect, %presetlist%
 
 return
 
