@@ -4205,7 +4205,7 @@ nm_LoadPreset() {
 	nm_SaveGui()
 	reload
 	Sleep, 10000
-}
+
 nm_showAdvancedSettings(){
 	global BuffDetectReset
 	static i := 0, t1, init := DllCall("GetSystemTimeAsFileTime", "int64p", t1)
