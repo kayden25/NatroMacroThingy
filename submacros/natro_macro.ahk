@@ -4039,26 +4039,23 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 	if (type!=0) {
 		PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 		PresetArray := {}
-		PresetArray[PresetGather] := "Gather"
-		PresetArray[PresetKill] := "Kill"
-		PresetArray[PresetQuest] := "Quests"
-		PresetArray[PresetCollect] := "Collect"
-		PresetArray[PresetBoost] := "Boost"
-		PresetArray[PresetPlanters] := "Planters"
-		PresetArray[PresetDiscord] := "Status"
-		PresetArray[PresetSettings] := "Settings"
-		PresetArray[PresetMisc] := "Misc"
-		for k, v in PresetArray {
-			if (k=0) {
-				PresetArray.Delete(k)
-			}
-		}
+		PresetArray["Gather"] := PresetGather
+		PresetArray["Kill"] := PresetKill
+		PresetArray["Quests"] := PresetQuest
+		PresetArray["Collect"] := PresetCollect
+		PresetArray["Boost"] := PresetBoost
+		PresetArray["Planters"] := PresetPlanters
+		PresetArray["Status"] := PresetDiscord
+		PresetArray["Settings"] := PresetSettings
+		PresetArray["Misc"] := PresetMisc
 		switch type {
 			case 1:
 				if (FileExist(A_WorkingDir "\settings\*.ini")) {
 					for k, v in PresetArray {
-						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %v%
-						FileAppend, %ini%, %PresetPath%
+						if (v!=0) {
+							IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
+							FileAppend, %ini%, %PresetPath%
+						}
 					}
 				}
 			case 2:
@@ -4067,8 +4064,10 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 				FileDelete, %PresetPath%
 				if (FileExist(A_WorkingDir "\settings\*.ini")) {
 					for k, v in PresetArray {
-						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %v%
-						IniWrite, %ini%, %PresetPath%, %v%
+						if (v!=0) {
+							IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
+							IniWrite, %ini%, %PresetPath%, %k%
+						}
 					}
 				}
 		}
