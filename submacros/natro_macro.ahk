@@ -21868,17 +21868,39 @@ nm_setStats()
 return
 
 showPresetGUI:
-WinGetPos, gx, gy, gw, gh, Natro Macro
-Gui, 2:New
-Gui, 2:Show, % "x" gx+85 " y" gy+35 " w300 h200", Preset Settings
 
-Gui 2:Font, s9, Segoe UI
-Gui 2:Add, Button, gnm_CreatePreset x13 y28 w90 h23, Create New
-Gui 2:Add, Button, gnm_DeletePreset x196 y52 w90 h21, &Delete
-Gui 2:Add, Button, x196 y5 w90 h23 gnm_OverwritePreset, Overwrite
-Gui 2:Add, Button, x90 y160 w120 h21 gnm_LoadPreset, Load Preset
-Gui 2:Add, Edit, x13 y5 w90 h23 vCreatePreset
-Gui 2:Add, DropDownList, x105 y5 w90 choose1 vPresetSelect, % ((presetlist = "|") ? "No Presets|" : presetlist)
+WinGetPos, gx, gy, gw, gh, Natro Macro
+Gui, PresetMain:New
+Gui, PresetMain:Show, % "x" gx+85 " y" gy+35 " w300 h200", Preset Settings
+
+Gui, PresetMain:Font, s9, Segoe UI
+Gui, PresetMain:Add, Button, gnm_CreatePreset x13 y5 w90 h21 gpresetCreationPopup, Create New
+Gui, PresetMain:Add, Button, gnm_DeletePreset x197 y51 w90 h21, &Delete
+Gui, PresetMain:Add, Button, x197 y28 w90 h21 gnm_OverwritePreset, Overwrite
+Gui, PresetMain:Add, Button, x90 y160 w120 h21 gnm_LoadPreset, Load Preset
+Gui, PresetMain:Add, DropDownList, x197 y5 w90 choose1 vPresetSelect, % ((presetlist = "|") ? "No Presets|" : presetlist)
+
+return
+
+presetCreationPopup:
+
+WinGetPos, gx, gy, gw, gh, Preset Settings
+Gui, PresetCreation:New
+Gui, PresetCreation:Show, % "x" gx+95 " y" gy-22 " w140 h259", Create
+
+Gui, PresetCreation:Font, s9, Segoe UI
+Gui, PresetCreation:Add, Button, gnm_LoadPreset x10 y238 w120 h21, Create
+Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 +Checked, Gather
+Gui, PresetCreation:Add, Edit, hWndhEdtValue x10 y0 w120 h21 vCreatePreset
+SendMessage 0x1501, 1, "Name",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
+Gui, PresetCreation:Add, CheckBox, x10 y70 w120 h23 +Checked, Kill
+Gui, PresetCreation:Add, CheckBox, x10 y118 w120 h23 +Checked, Quest
+Gui, PresetCreation:Add, CheckBox, x10 y46 w120 h23 +Checked, Collect
+Gui, PresetCreation:Add, CheckBox, x10 y94 w120 h23 +Checked, Boost
+Gui, PresetCreation:Add, CheckBox, x10 y142 w120 h23 +Checked, Planters
+Gui, PresetCreation:Add, CheckBox, x10 y166 w120 h23, Discord
+Gui, PresetCreation:Add, CheckBox, x10 y190 w120 h23 +Checked, Settings
+Gui, PresetCreation:Add, CheckBox, x10 y214 w120 h23 +Checked, Misc
 
 return
 
