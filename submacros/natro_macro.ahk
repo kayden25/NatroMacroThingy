@@ -1751,7 +1751,7 @@ global PreviousAction:="None"
 global CurrentAction:="Startup"
 fieldnamelist := "|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower|"
 global presetlist := "|"
-Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
+Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 	{
 		if (A_LoopFileName!="") {
 			presetlist .= A_LoopFileName . "|"
@@ -4024,29 +4024,60 @@ nm_WebhookEasterEgg(){
 	}
 }
 nm_CreatePresetFiles(PresetName, type:=0) {
+	GuiControlGet, PresetGather
+	GuiControlGet, PresetKill
+	GuiControlGet, PresetQuest
+	GuiControlGet, PresetCollect
+	GuiControlGet, PresetBoost
+	GuiControlGet, PresetPlanters
+	GuiControlGet, PresetDiscord
+	GuiControlGet, PresetSettings
+	GuiControlGet, PresetMisc
 	if (!FileExist(A_WorkingDir "\settings\presets")) {
 		FileCreateDir, %A_WorkingDir%\settings\presets
 	}
 	if (type!=0) {
+		PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
+		PresetArray := {}
+		PresetArray[PresetGather] := "Gather"
+		PresetArray[PresetKill] := "Kill"
+		PresetArray[PresetQuest] := "Quests"
+		PresetArray[PresetCollect] := "Collect"
+		PresetArray[PresetBoost] := "Boost"
+		PresetArray[PresetPlanters] := "Planters"
+		PresetArray[PresetDiscord] := "Status"
+		PresetArray[PresetSettings] := "Settings"
+		PresetArray[PresetMisc] := "Misc"
+		for k, v in PresetArray {
+			if (k=0) {
+				PresetArray.Delete(k)
+			}
+		}
 		switch type {
-			case 1: 
-				FileCreateDir, %A_WorkingDir%\settings\presets\%PresetName%
-				if FileExist(A_WorkingDir "\settings\*.ini")
-					FileCopy, %A_WorkingDir%\settings\*.ini, %A_WorkingDir%\settings\presets\%PresetName%, 1
-			case 2: 
-				FileRemoveDir, %A_WorkingDir%\settings\presets\%PresetName%, 1
+			case 1:
+				if (FileExist(A_WorkingDir "\settings\*.ini")) {
+					for k, v in PresetArray {
+						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %v%
+						FileAppend, %ini%, %PresetPath%
+					}
+				}
+			case 2:
+				FileDelete, %PresetPath%
 			case 3: 
-				FileRemoveDir, %A_WorkingDir%\settings\presets\%PresetName%, 1
-				FileCreateDir, %A_WorkingDir%\settings\presets\%PresetName%
-				if FileExist(A_WorkingDir "\settings\*.ini")
-					FileCopy, %A_WorkingDir%\settings\*.ini, %A_WorkingDir%\settings\presets\%PresetName%, 1
+				FileDelete, %PresetPath%
+				if (FileExist(A_WorkingDir "\settings\*.ini")) {
+					for k, v in PresetArray {
+						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %v%
+						IniWrite, %ini%, %PresetPath%, %v%
+					}
+				}
 		}
 	}
 }
 nm_CreatePreset() {
 	GuiControlGet, CreatePreset
 	PresetName := CreatePreset
-	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
 	if (PresetName="No Preset") {
 		MsgBox ,,, You can't create no preset. Use a different name., 5
@@ -4067,7 +4098,7 @@ nm_CreatePreset() {
 	}
 
 	presetlist := "|"
-	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
+	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
 			if (A_LoopFileName!="") {
 				presetlist .= A_LoopFileName . "|"
@@ -4078,7 +4109,7 @@ nm_CreatePreset() {
 nm_OverwritePreset() {
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
-	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
 	if (PresetName="") {
 		MsgBox ,,, No preset selected., 5
@@ -4097,7 +4128,7 @@ nm_OverwritePreset() {
 		return
 	nm_CreatePresetFiles(PresetName, 3)
 	presetlist := "|"
-	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
+	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
 			if (A_LoopFileName!="") {
 				presetlist .= A_LoopFileName . "|"
@@ -4108,7 +4139,7 @@ nm_OverwritePreset() {
 nm_DeletePreset() {
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
-	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
 	if (PresetName="") {
 		MsgBox ,,, No preset selected., 5
@@ -4127,7 +4158,7 @@ nm_DeletePreset() {
 		return
 	nm_CreatePresetFiles(PresetName, 2)
 	presetlist := "|"
-	Loop, Files, %A_WorkingDir%\settings\presets\*.*, D
+	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
 			if (A_LoopFileName!="") {
 				presetlist .= A_LoopFileName . "|"
@@ -4138,7 +4169,7 @@ nm_DeletePreset() {
 nm_LoadPreset() {
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
-	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	if (PresetName="") {
 		MsgBox ,,, No preset selected., 5
 		return
@@ -4154,8 +4185,20 @@ nm_LoadPreset() {
 	MsgBox , 4,, Do you want to load %PresetName%? Current settings will be lost.
 	IfMsgBox no
 		return
-	if FileExist(PresetPath "\*.ini")
-		FileCopy, %PresetPath%\*.ini, %A_WorkingDir%\settings, 1
+	if (FileExist(PresetPath)) {
+		AllSections := []
+		Loop, Read, %PresetPath% {
+			if RegExMatch(A_LoopReadLine, "^\[([^\]]+)\]", Section) {
+				i := (IsSet(I)) ? ++I : 1 
+				AllSections[i] := Section
+				I := i
+			}
+		}
+		for k, v in AllSections {
+			IniRead, ini, %PresetPath%, %v%
+			IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
+		}
+	}
 	WinClose, StatMonitor.ahk ahk_class AutoHotkey
 	WinClose, background.ahk ahk_class AutoHotkey
 	WinClose, Status.ahk ahk_class AutoHotkey
@@ -21874,7 +21917,7 @@ Gui, PresetMain:New
 Gui, PresetMain:Show, % "x" gx+85 " y" gy+35 " w300 h200", Preset Settings
 
 Gui, PresetMain:Font, s9, Segoe UI
-Gui, PresetMain:Add, Button, gnm_CreatePreset x13 y5 w90 h21 gpresetCreationPopup, Create New
+Gui, PresetMain:Add, Button, x13 y5 w90 h21 gpresetCreationPopup, Create New
 Gui, PresetMain:Add, Button, gnm_DeletePreset x197 y51 w90 h21, &Delete
 Gui, PresetMain:Add, Button, x197 y28 w90 h21 gnm_OverwritePreset, Overwrite
 Gui, PresetMain:Add, Button, x90 y160 w120 h21 gnm_LoadPreset, Load Preset
@@ -21889,18 +21932,18 @@ Gui, PresetCreation:New
 Gui, PresetCreation:Show, % "x" gx+95 " y" gy-22 " w140 h259", Create
 
 Gui, PresetCreation:Font, s9, Segoe UI
-Gui, PresetCreation:Add, Button, gnm_LoadPreset x10 y238 w120 h21, Create
-Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 +Checked, Gather
+Gui, PresetCreation:Add, Button, gnm_CreatePreset x10 y238 w120 h21, Create
+Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 +Checked vPresetGather, Gather
 Gui, PresetCreation:Add, Edit, hWndhEdtValue x10 y0 w120 h21 vCreatePreset
 SendMessage 0x1501, 1, "Name",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
-Gui, PresetCreation:Add, CheckBox, x10 y70 w120 h23 +Checked, Kill
-Gui, PresetCreation:Add, CheckBox, x10 y118 w120 h23 +Checked, Quest
-Gui, PresetCreation:Add, CheckBox, x10 y46 w120 h23 +Checked, Collect
-Gui, PresetCreation:Add, CheckBox, x10 y94 w120 h23 +Checked, Boost
-Gui, PresetCreation:Add, CheckBox, x10 y142 w120 h23 +Checked, Planters
-Gui, PresetCreation:Add, CheckBox, x10 y166 w120 h23, Discord
-Gui, PresetCreation:Add, CheckBox, x10 y190 w120 h23 +Checked, Settings
-Gui, PresetCreation:Add, CheckBox, x10 y214 w120 h23 +Checked, Misc
+Gui, PresetCreation:Add, CheckBox, x10 y70 w120 h23 +Checked vPresetKill, Kill
+Gui, PresetCreation:Add, CheckBox, x10 y118 w120 h23 +Checked vPresetQuest, Quest
+Gui, PresetCreation:Add, CheckBox, x10 y46 w120 h23 +Checked vPresetCollect, Collect
+Gui, PresetCreation:Add, CheckBox, x10 y94 w120 h23 +Checked vPresetBoost, Boost
+Gui, PresetCreation:Add, CheckBox, x10 y142 w120 h23 +Checked vPresetPlanters, Planters
+Gui, PresetCreation:Add, CheckBox, x10 y166 w120 h23 vPresetDiscord, Discord
+Gui, PresetCreation:Add, CheckBox, x10 y190 w120 h23 +Checked vPresetSettings, Settings
+Gui, PresetCreation:Add, CheckBox, x10 y214 w120 h23 +Checked vPresetMisc, Misc
 
 return
 
