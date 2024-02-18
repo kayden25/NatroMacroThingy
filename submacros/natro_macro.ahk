@@ -4041,21 +4041,23 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 		PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 		PresetArray := {}
 		PresetArray["Gather"] := PresetGather
-		PresetArray["Kill"] := PresetKill
+		; Work in progress: PresetArray["Kill"] := PresetKill
 		PresetArray["Quests"] := PresetQuest
 		PresetArray["Collect"] := PresetCollect
+		PresetArray["Blender"] := PresetCollect
 		PresetArray["Boost"] := PresetBoost
-		PresetArray["Planters"] := PresetPlanters
+		PresetArray["Shrine"] := PresetBoost
+		PresetArray["Gui"] := PresetPlanters
 		PresetArray["Status"] := PresetDiscord
 		PresetArray["Settings"] := PresetSettings
-		PresetArray["Misc"] := PresetMisc
+		; Work in progress: PresetArray["Misc"] := PresetMisc
 		switch type {
 			case 1:
 				if (FileExist(A_WorkingDir "\settings\*.ini")) {
 					for k, v in PresetArray {
 						if (v!=0) {
 							IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
-							FileAppend, %ini%, %PresetPath%
+							IniWrite, %ini%, %PresetPath%, %k%
 						}
 					}
 				}
