@@ -1754,7 +1754,8 @@ global presetlist := "|"
 Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 	{
 		if (A_LoopFileName!="") {
-			presetlist .= A_LoopFileName . "|"
+			SplitPath, A_LoopFileName,,,, FileName
+				presetlist .= FileName . "|"
 		}
 	}
 hotbarwhilelist := "|Never|Always|At Hive|Gathering|Attacking|Microconverter|Whirligig|Enzymes|GatherStart|Snowflake|"
@@ -4100,9 +4101,12 @@ nm_CreatePreset() {
 	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
 			if (A_LoopFileName!="") {
-				presetlist .= A_LoopFileName . "|"
+				SplitPath, A_LoopFileName,,,, FileName
+				presetlist .= FileName . "|"
 			}
 		}
+	Gui, PresetCreation:destroy
+	gui, PresetMain:Default
 	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_OverwritePreset() {
@@ -4130,7 +4134,8 @@ nm_OverwritePreset() {
 	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
 			if (A_LoopFileName!="") {
-				presetlist .= A_LoopFileName . "|"
+				SplitPath, A_LoopFileName,,,, FileName
+				presetlist .= FileName . "|"
 			}
 		}
 	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
@@ -4160,7 +4165,8 @@ nm_DeletePreset() {
 	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
 			if (A_LoopFileName!="") {
-				presetlist .= A_LoopFileName . "|"
+				SplitPath, A_LoopFileName,,,, FileName
+				presetlist .= FileName . "|"
 			}
 		}
 		GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
