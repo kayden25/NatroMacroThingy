@@ -2280,7 +2280,7 @@ Gui, Tab, Settings
 Gui, Font, w700
 Gui, Add, GroupBox, x5 y25 w160 h65, Gui
 Gui, Add, GroupBox, x5 y95 w160 h65, Hive
-Gui, Add, GroupBox, x5 y165 w160 h70, Reset
+Gui, Add, GroupBox, x5 y165 w160 h70, Reset and Presets
 Gui, Add, GroupBox, x170 y25 w160 h35, Input
 Gui, Add, GroupBox, x170 y65 w160 h170, Reconnect
 Gui, Add, GroupBox, x335 y25 w160 h210, Character
@@ -21919,8 +21919,10 @@ Gui, PresetMain:Font, s9, Segoe UI
 Gui, PresetMain:Add, Button, x13 y5 w90 h21 gpresetCreationPopup, Create New
 Gui, PresetMain:Add, Button, gnm_DeletePreset x197 y51 w90 h21, &Delete
 Gui, PresetMain:Add, Button, x197 y28 w90 h21 gnm_OverwritePreset, Overwrite
-Gui, PresetMain:Add, Button, x90 y160 w120 h21 gnm_LoadPreset, Load Preset
+Gui, PresetMain:Add, Button, x90 y174 w120 h21 gnm_LoadPreset, Load Preset
 Gui, PresetMain:Add, DropDownList, x197 y5 w90 choose1 vPresetSelect, % ((presetlist = "|") ? "No Presets|" : presetlist)
+Gui, PresetMain:Add, Button, x110 y128 w80 h23, Import
+Gui, PresetMain:Add, Button, x110 y151 w80 h23, Export
 
 return
 
