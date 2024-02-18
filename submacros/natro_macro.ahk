@@ -4186,8 +4186,9 @@ nm_LoadPreset() {
 		return
 	if (FileExist(PresetPath)) {
 		AllSections := []
-		Loop, Read, %PresetPath% {
-			if RegExMatch(A_LoopReadLine, "^\[([^\]]+)\]", Section) {
+		Loop, Read, %PresetPath% 
+		{
+			if (RegExMatch(A_LoopReadLine, "^\[([^\]]+)\]", Section)) {
 				i := (IsSet(I)) ? ++I : 1 
 				AllSections[i] := Section
 				I := i
@@ -4204,7 +4205,7 @@ nm_LoadPreset() {
 	nm_SaveGui()
 	reload
 	Sleep, 10000
-
+}
 nm_showAdvancedSettings(){
 	global BuffDetectReset
 	static i := 0, t1, init := DllCall("GetSystemTimeAsFileTime", "int64p", t1)
