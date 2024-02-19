@@ -2315,7 +2315,7 @@ Gui, Add, Text, x54 y142 w110 +left +BackgroundTrans,seconds after convert
 ;reset settings
 Gui Add, Button, vResetFieldDefaultsButton gnm_ResetFieldDefaultGUI x21 y180 w130 h16 Disabled , Reset Field Defaults
 Gui Add, Button, vResetAllButton gnm_ResetConfig x21 y197 w130 h16 Disabled , Reset All Settings
-Gui Add, Button, x21 y214 w130 h16 vShowPresetButton gshowPresetGUI, Preset Settings
+Gui Add, Button, x21 y214 w130 h16 vShowPresetButton gshowPresetGUI Disabled, Preset Settings
 
 ;input settings
 Gui, Add, Text, x176 y40 w100 +left +BackgroundTrans,Add Key Delay (ms):
@@ -4037,7 +4037,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 	if (!FileExist(A_WorkingDir "\settings\presets")) {
 		FileCreateDir, %A_WorkingDir%\settings\presets
 	}
-	if (type!=0) {
+	if (type!=0) { ;create/delete/overwrite files
 		PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 		PresetArray := {} ; array to determin what to save to preset
 		PresetArray["Gather"] := PresetGather
@@ -4051,10 +4051,18 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 		PresetArray["Status"] := PresetDiscord
 		PresetArray["Settings"] := PresetSettings
 		; Work in progress: PresetArray["Misc"] := PresetMisc
+		IniRead, SectionNames, %A_WorkingDir%\settings\manual_planters.ini
+		PlanterSections := StrSplit(SectionNames, "`n") ; get manual panters ini
 		switch type {
 			case 1: ; create preset file
 				for k, v in PresetArray {
 					if (v!=0) {
+						if (k="Gui") { ; save manual planter settings to preset
+							for x, y in PlanterSections { 
+								IniRead, ini, %A_WorkingDir%\settings\manual_planters.ini, %y%
+								IniWrite, %ini%, %PresetPath%, %y%
+							}
+						}
 						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
 						IniWrite, %ini%, %PresetPath%, %k%
 					}
@@ -4065,6 +4073,12 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 				FileDelete, %PresetPath%
 				for k, v in PresetArray {
 					if (v!=0) {
+						if (k="Gui") { ; save manual planter settings to preset
+							for x, y in PlanterSections { 
+								IniRead, ini, %A_WorkingDir%\settings\manual_planters.ini, %y%
+								IniWrite, %ini%, %PresetPath%, %y%
+							}
+						}
 						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
 						IniWrite, %ini%, %PresetPath%, %k%
 					}
@@ -4192,7 +4206,12 @@ nm_LoadPreset() {
 	SectionArray := StrSplit(SectionNames, "`n") ; save section names to array
 	for k, v in SectionArray { ; load preset
 		IniRead, ini, %PresetPath%, %v%
-		IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
+		if (v="General" || v="Slot 1" || v="Slot 2" || v="Slot 3") { ; load manual planter settings
+			IniWrite, %ini%, %A_WorkingDir%\settings\manual_planters.ini, %v%
+		}
+		else {
+			IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
+		}
 	}
 	WinClose, StatMonitor.ahk ahk_class AutoHotkey
 	WinClose, background.ahk ahk_class AutoHotkey
