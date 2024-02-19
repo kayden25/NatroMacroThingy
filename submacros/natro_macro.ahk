@@ -4051,8 +4051,10 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 		PresetArray["Status"] := PresetDiscord
 		PresetArray["Settings"] := PresetSettings
 		; Work in progress: PresetArray["Misc"] := PresetMisc
-		IniRead, SectionNames, %A_WorkingDir%\settings\manual_planters.ini
-		PlanterSections := StrSplit(SectionNames, "`n") ; get manual panters ini
+		IniRead, planterSectionNames, %A_WorkingDir%\settings\manual_planters.ini
+		PlanterSections := StrSplit(planterSectionNames, "`n") ; get manual panters ini
+		IniRead, fieldSectionNames, %A_WorkingDir%\settings\field_config.ini
+		FieldSections := StrSplit(fieldSectionNames, "`n") ; get field defaults
 		switch type {
 			case 1: ; create preset file
 				for k, v in PresetArray {
@@ -4060,6 +4062,12 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 						if (k="Gui") { ; save manual planter settings to preset
 							for x, y in PlanterSections { 
 								IniRead, ini, %A_WorkingDir%\settings\manual_planters.ini, %y%
+								IniWrite, %ini%, %PresetPath%, %y%
+							}
+						}
+						if (k="Gather") {
+							for x, y in FieldSections { 
+								IniRead, ini, %A_WorkingDir%\settings\field_config.ini, %y%
 								IniWrite, %ini%, %PresetPath%, %y%
 							}
 						}
@@ -4076,6 +4084,12 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 						if (k="Gui") { ; save manual planter settings to preset
 							for x, y in PlanterSections { 
 								IniRead, ini, %A_WorkingDir%\settings\manual_planters.ini, %y%
+								IniWrite, %ini%, %PresetPath%, %y%
+							}
+						}
+						if (k="Gather") {
+							for x, y in FieldSections { 
+								IniRead, ini, %A_WorkingDir%\settings\field_config.ini, %y%
 								IniWrite, %ini%, %PresetPath%, %y%
 							}
 						}
@@ -4208,6 +4222,9 @@ nm_LoadPreset() {
 		IniRead, ini, %PresetPath%, %v%
 		if (v="General" || v="Slot 1" || v="Slot 2" || v="Slot 3") { ; load manual planter settings
 			IniWrite, %ini%, %A_WorkingDir%\settings\manual_planters.ini, %v%
+		}
+		else if (v="Bamboo" || v="Blue Flower" || v="Cactus" || v="Clover" || v="Coconut" || v="Dandelion" || v="Mountain Top" || v="Mushroom" || v="Pepper" || v="Pine Tree" || v="Pineapple" || v="Pumpkin" || v="Rose" || v="Spider" || v="Strawberry" || v="Stump" || v="Sunflower") {
+			IniWrite, %ini%, %A_WorkingDir%\settings\field_config.ini, %v%
 		}
 		else {
 			IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
