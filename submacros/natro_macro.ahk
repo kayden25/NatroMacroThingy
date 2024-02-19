@@ -4056,7 +4056,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 		IniRead, fieldSectionNames, %A_WorkingDir%\settings\field_config.ini
 		FieldSections := StrSplit(fieldSectionNames, "`n") ; get field defaults
 		switch type {
-			case 1: ; create preset file
+			case 1: ; create the preset file
 				for k, v in PresetArray {
 					if (v!=0) {
 						if (k="Gui") { ; save manual planter settings to preset
@@ -4065,7 +4065,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 								IniWrite, %ini%, %PresetPath%, %y%
 							}
 						}
-						if (k="Gather") {
+						if (k="Gather") { ; save field defaults
 							for x, y in FieldSections { 
 								IniRead, ini, %A_WorkingDir%\settings\field_config.ini, %y%
 								IniWrite, %ini%, %PresetPath%, %y%
@@ -4077,51 +4077,32 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 				}
 			case 2: ; delete preset file
 				FileDelete, %PresetPath%
-			case 3: ; overwrite preset file
-				FileDelete, %PresetPath%
-				for k, v in PresetArray {
-					if (v!=0) {
-						if (k="Gui") { ; save manual planter settings to preset
-							for x, y in PlanterSections { 
-								IniRead, ini, %A_WorkingDir%\settings\manual_planters.ini, %y%
-								IniWrite, %ini%, %PresetPath%, %y%
-							}
-						}
-						if (k="Gather") {
-							for x, y in FieldSections { 
-								IniRead, ini, %A_WorkingDir%\settings\field_config.ini, %y%
-								IniWrite, %ini%, %PresetPath%, %y%
-							}
-						}
-						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
-						IniWrite, %ini%, %PresetPath%, %k%
-					}
-				}
 		}
 	}
 }
 nm_CreatePreset() {
-	GuiControlGet, CreatePreset
-	PresetName := CreatePreset
+	GuiControlGet, SetPresetName
+	PresetName := SetPresetName
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
-	if (PresetName="No Preset") {
-		MsgBox ,,, You can't create no preset. Use a different name., 5
-		return
+	loop 2 {
+		ErrorCheck := (A_Index=1 && PresetName="") ? 1
+			: (A_Index=2 && PresetName="No Presets") ? 1 : 0
+		ErrorMsg := (A_Index=1) ? "No preset name given."
+			: (A_Index=2) ? "You can't create no preset. Use a different name."
+			: "Unknown Error"
+		if (ErrorCheck) {
+			MsgBox ,,, %ErrorMsg%, 5
+			return
+		}
 	}
-	else if (PresetName="") {
-		MsgBox ,,, No preset name given., 5
-		return
-	}
-	else if (FileExist(PresetPath)) {
+	if (FileExist(PresetPath)) {
 		MsgBox , 4,,Preset %PresetName% is already created. Do you want to overwrite %PresetName%?
 		IfMsgBox no
 			return
-		nm_CreatePresetFiles(PresetName, 3)
+		nm_CreatePresetFiles(PresetName, 2)
 	}
-	else {
-		nm_CreatePresetFiles(PresetName, 1)
-	}
+	nm_CreatePresetFiles(PresetName, 1)
 
 	presetlist := "|" ; setting new presets to selection
 	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
@@ -4136,26 +4117,37 @@ nm_CreatePreset() {
 	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_OverwritePreset() {
+	GuiControlGet, SetPresetName
+	gui, PresetMain:Default
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
-	if (PresetName="") {
-		MsgBox ,,, No preset selected., 5
-		return
-	}
-	else if (PresetName="No Presets") {
-		MsgBox ,,, No presets created., 5
-		return
-	}
-	else if (!FileExist(PresetPath)) {
-		MsgBox ,,, Preset %PresetName% does not exist., 5
-		return
+	loop 4 {
+		ErrorCheck := (A_Index=1 && PresetName="") ? 1
+			: (A_Index=2 && PresetName="No Presets") ? 1
+			: (A_Index=3 && !FileExist(PresetPath)) ? 1 
+			: (A_Index=4 && FileExist(A_WorkingDir "\settings\presets\" SetPresetName ".ini")) ? 1 : 0
+		ErrorMsg := (A_Index=1) ? "No preset selected."
+			: (A_Index=2) ? "No presets created."
+			: (A_Index=3) ? "Preset " . PresetName . " does not exist."
+			: (A_Index=4) ? "A preset with the name " SetPresetName " already exists. Please choose a different name."
+			: "Unknown Error"
+		if (ErrorCheck) {
+			MsgBox ,,, %ErrorMsg%, 5
+			return
+		}
 	}
 	MsgBox , 4,,Do you want to overwrite %PresetName%?
 	IfMsgBox no
 		return
-	nm_CreatePresetFiles(PresetName, 3)
+	nm_CreatePresetFiles(PresetName, 2)
+	if (SetPresetName!="") {
+		nm_CreatePresetFiles(SetPresetName, 1)
+	} 
+	else {
+		nm_CreatePresetFiles(PresetName, 1)
+	}
 	presetlist := "|" ; setting new presets to selection
 	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
@@ -4164,6 +4156,7 @@ nm_OverwritePreset() {
 				presetlist .= FileName . "|"
 			}
 		}
+	Gui, PresetCreation:destroy
 	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_DeletePreset() {
@@ -4171,17 +4164,18 @@ nm_DeletePreset() {
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
-	if (PresetName="") {
-		MsgBox ,,, No preset selected., 5
-		return
-	}
-	else if (PresetName="No Presets") {
-		MsgBox ,,, No presets created., 5
-		return
-	}
-	if (!FileExist(PresetPath)) {
-		MsgBox ,,, Preset %PresetName% does not exist., 5
-		return
+	loop 3 {
+		ErrorCheck := (A_Index=1 && PresetName="") ? 1
+			: (A_Index=2 && PresetName="No Presets") ? 1
+			: (A_Index=3 && !FileExist(PresetPath)) ? 1 : 0
+		ErrorMsg := (A_Index=1) ? "No preset selected."
+			: (A_Index=2) ? "No presets created."
+			: (A_Index=3) ? "Preset " PresetName "does not exist."
+			: "Unknown Error"
+		if (ErrorCheck) {
+			MsgBox ,,, %ErrorMsg%, 5
+			return
+		}
 	}
 	MsgBox , 4,, Do you want to delete %PresetName%?
 	IfMsgBox no
@@ -4201,17 +4195,18 @@ nm_LoadPreset() {
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
-	if (PresetName="") {
-		MsgBox ,,, No preset selected., 5
-		return
-	}
-	else if (PresetName="No Presets") {
-		MsgBox ,,, No presets created., 5
-		return
-	}
-	else if (!FileExist(PresetPath)) {
-		MsgBox ,,, Preset %PresetName% does not exist., 5
-		return
+	loop 3 {
+		ErrorCheck := (A_Index=1 && PresetName="") ? 1
+			: (A_Index=2 && PresetName="No Presets") ? 1
+			: (A_Index=3 && !FileExist(PresetPath)) ? 1 : 0
+		ErrorMsg := (A_Index=1) ? "No preset selected."
+			: (A_Index=2) ? "No presets created."
+			: (A_Index=3) ? "Preset " PresetName "does not exist."
+			: "Unknown Error"
+		if (ErrorCheck) {
+			MsgBox ,,, %ErrorMsg%, 5
+			return
+		}
 	}
 	MsgBox , 4,, Do you want to load %PresetName%? Current settings will be lost.
 	IfMsgBox no
@@ -4220,11 +4215,11 @@ nm_LoadPreset() {
 	SectionArray := StrSplit(SectionNames, "`n") ; save section names to array
 	for k, v in SectionArray { ; load preset
 		IniRead, ini, %PresetPath%, %v%
-		if (v="General" || v="Slot 1" || v="Slot 2" || v="Slot 3") { ; load manual planter settings
-			IniWrite, %ini%, %A_WorkingDir%\settings\manual_planters.ini, %v%
+		if (v="General" || v="Slot 1" || v="Slot 2" || v="Slot 3") {
+			IniWrite, %ini%, %A_WorkingDir%\settings\manual_planters.ini, %v% ; load manual planter settings
 		}
 		else if (v="Bamboo" || v="Blue Flower" || v="Cactus" || v="Clover" || v="Coconut" || v="Dandelion" || v="Mountain Top" || v="Mushroom" || v="Pepper" || v="Pine Tree" || v="Pineapple" || v="Pumpkin" || v="Rose" || v="Spider" || v="Strawberry" || v="Stump" || v="Sunflower") {
-			IniWrite, %ini%, %A_WorkingDir%\settings\field_config.ini, %v%
+			IniWrite, %ini%, %A_WorkingDir%\settings\field_config.ini, %v% ; load field defaults
 		}
 		else {
 			IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
@@ -21950,37 +21945,48 @@ Gui, PresetMain:New
 Gui, PresetMain:Show, % "x" gx+85 " y" gy+35 " w300 h200", Preset Settings
 
 Gui, PresetMain:Font, s9, Segoe UI
-Gui, PresetMain:Add, Button, x13 y5 w90 h21 gpresetCreationPopup, Create New
+Gui, PresetMain:Add, Button, x13 y5 w90 h21 gCreatePresetGui, Create New
 Gui, PresetMain:Add, Button, gnm_DeletePreset x197 y51 w90 h21, &Delete
-Gui, PresetMain:Add, Button, x197 y28 w90 h21 gnm_OverwritePreset, Overwrite
+Gui, PresetMain:Add, Button, x197 y28 w90 h21 gOverwritePresetGui, Overwrite
 Gui, PresetMain:Add, Button, x90 y174 w120 h21 gnm_LoadPreset, Load Preset
 Gui, PresetMain:Add, DropDownList, x197 y5 w90 choose1 vPresetSelect, % ((presetlist = "|") ? "No Presets|" : presetlist)
 Gui, PresetMain:Add, Button, x110 y128 w80 h23, Import
 Gui, PresetMain:Add, Button, x110 y151 w80 h23, Export
 
 return
-
-presetCreationPopup:
-
-WinGetPos, gx, gy, gw, gh, Preset Settings
-Gui, PresetCreation:New
-Gui, PresetCreation:Show, % "x" gx+95 " y" gy-22 " w140 h259", Create
-
-Gui, PresetCreation:Font, s9, Segoe UI
-Gui, PresetCreation:Add, Button, gnm_CreatePreset x10 y238 w120 h21, Create
-Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 +Checked vPresetGather, Gather
-Gui, PresetCreation:Add, Edit, hWndhEdtValue x10 y0 w120 h21 vCreatePreset
-SendMessage 0x1501, 1, "Name",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
-Gui, PresetCreation:Add, CheckBox, x10 y70 w120 h23 +Checked vPresetKill, Kill
-Gui, PresetCreation:Add, CheckBox, x10 y118 w120 h23 +Checked vPresetQuest, Quest
-Gui, PresetCreation:Add, CheckBox, x10 y46 w120 h23 +Checked vPresetCollect, Collect
-Gui, PresetCreation:Add, CheckBox, x10 y94 w120 h23 +Checked vPresetBoost, Boost
-Gui, PresetCreation:Add, CheckBox, x10 y142 w120 h23 +Checked vPresetPlanters, Planters
-Gui, PresetCreation:Add, CheckBox, x10 y166 w120 h23 vPresetDiscord, Discord
-Gui, PresetCreation:Add, CheckBox, x10 y190 w120 h23 +Checked vPresetSettings, Settings
-Gui, PresetCreation:Add, CheckBox, x10 y214 w120 h23 +Checked vPresetMisc, Misc
-
+CreatePresetGui:
+nm_PresetPopup()
 return
+OverwritePresetGui:
+nm_PresetPopup(1)
+return
+nm_PresetPopup(type:=0) {
+	global
+	WinGetPos, gx, gy, gw, gh, Preset Settings
+	Gui, PresetCreation:New
+	Gui, PresetCreation:Show, % "x" gx+95 " y" gy-22 " w140 h259", Create
+	Gui, PresetCreation:Font, s9, Segoe UI
+
+	Gui, PresetCreation:Add, Edit, hWndhEdtValue x10 y0 w120 h21 vSetPresetName
+	if (type=1) {
+		Gui, PresetCreation:Add, Button, gnm_OverwritePreset x10 y238 w120 h21, Overwrite
+		SendMessage 0x1501, 1, "Rename",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
+	} else {
+		Gui, PresetCreation:Add, Button, gnm_CreatePreset x10 y238 w120 h21, Create
+		SendMessage 0x1501, 1, "Name",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
+	}
+	Gui, PresetCreation:Add, Button, gnm_CreatePreset x10 y238 w120 h21, %button%
+
+	Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 +Checked vPresetGather, Gather
+	Gui, PresetCreation:Add, CheckBox, x10 y70 w120 h23 +Checked vPresetKill, Kill
+	Gui, PresetCreation:Add, CheckBox, x10 y118 w120 h23 +Checked vPresetQuest, Quest
+	Gui, PresetCreation:Add, CheckBox, x10 y46 w120 h23 +Checked vPresetCollect, Collect
+	Gui, PresetCreation:Add, CheckBox, x10 y94 w120 h23 +Checked vPresetBoost, Boost
+	Gui, PresetCreation:Add, CheckBox, x10 y142 w120 h23 +Checked vPresetPlanters, Planters
+	Gui, PresetCreation:Add, CheckBox, x10 y166 w120 h23 vPresetDiscord, Discord
+	Gui, PresetCreation:Add, CheckBox, x10 y190 w120 h23 +Checked vPresetSettings, Settings
+	Gui, PresetCreation:Add, CheckBox, x10 y214 w120 h23 +Checked vPresetMisc, Misc
+}
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; HOTKEYS
