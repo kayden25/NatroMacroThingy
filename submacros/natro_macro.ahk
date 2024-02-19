@@ -2315,7 +2315,7 @@ Gui, Add, Text, x54 y142 w110 +left +BackgroundTrans,seconds after convert
 ;reset settings
 Gui Add, Button, vResetFieldDefaultsButton gnm_ResetFieldDefaultGUI x21 y180 w130 h16 Disabled , Reset Field Defaults
 Gui Add, Button, vResetAllButton gnm_ResetConfig x21 y197 w130 h16 Disabled , Reset All Settings
-Gui Add, Button, x21 y214 w130 h16 gshowPresetGUI, Preset Settings
+Gui Add, Button, x21 y214 w130 h16 vShowPresetButton gshowPresetGUI, Preset Settings
 
 ;input settings
 Gui, Add, Text, x176 y40 w100 +left +BackgroundTrans,Add Key Delay (ms):
@@ -4039,7 +4039,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 	}
 	if (type!=0) {
 		PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
-		PresetArray := {}
+		PresetArray := {} ; array to determin what to save to preset
 		PresetArray["Gather"] := PresetGather
 		; Work in progress: PresetArray["Kill"] := PresetKill
 		PresetArray["Quests"] := PresetQuest
@@ -4052,25 +4052,21 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 		PresetArray["Settings"] := PresetSettings
 		; Work in progress: PresetArray["Misc"] := PresetMisc
 		switch type {
-			case 1:
-				if (FileExist(A_WorkingDir "\settings\*.ini")) {
-					for k, v in PresetArray {
-						if (v!=0) {
-							IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
-							IniWrite, %ini%, %PresetPath%, %k%
-						}
+			case 1: ; create preset file
+				for k, v in PresetArray {
+					if (v!=0) {
+						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
+						IniWrite, %ini%, %PresetPath%, %k%
 					}
 				}
-			case 2:
+			case 2: ; delete preset file
 				FileDelete, %PresetPath%
-			case 3: 
+			case 3: ; overwrite preset file
 				FileDelete, %PresetPath%
-				if (FileExist(A_WorkingDir "\settings\*.ini")) {
-					for k, v in PresetArray {
-						if (v!=0) {
-							IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
-							IniWrite, %ini%, %PresetPath%, %k%
-						}
+				for k, v in PresetArray {
+					if (v!=0) {
+						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
+						IniWrite, %ini%, %PresetPath%, %k%
 					}
 				}
 		}
@@ -4099,7 +4095,7 @@ nm_CreatePreset() {
 		nm_CreatePresetFiles(PresetName, 1)
 	}
 
-	presetlist := "|"
+	presetlist := "|" ; setting new presets to selection
 	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
 			if (A_LoopFileName!="") {
@@ -4132,7 +4128,7 @@ nm_OverwritePreset() {
 	IfMsgBox no
 		return
 	nm_CreatePresetFiles(PresetName, 3)
-	presetlist := "|"
+	presetlist := "|" ; setting new presets to selection
 	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
 			if (A_LoopFileName!="") {
@@ -4163,7 +4159,7 @@ nm_DeletePreset() {
 	IfMsgBox no
 		return
 	nm_CreatePresetFiles(PresetName, 2)
-	presetlist := "|"
+	presetlist := "|" ; setting new presets to selection
 	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
 			if (A_LoopFileName!="") {
@@ -4192,20 +4188,11 @@ nm_LoadPreset() {
 	MsgBox , 4,, Do you want to load %PresetName%? Current settings will be lost.
 	IfMsgBox no
 		return
-	if (FileExist(PresetPath)) {
-		AllSections := []
-		Loop, Read, %PresetPath% 
-		{
-			if (RegExMatch(A_LoopReadLine, "^\[([^\]]+)\]", Section)) {
-				i := (IsSet(I)) ? ++I : 1 
-				AllSections[i] := Section
-				I := i
-			}
-		}
-		for k, v in AllSections {
-			IniRead, ini, %PresetPath%, %v%
-			IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
-		}
+	IniRead, SectionNames, %PresetPath%
+	SectionArray := StrSplit(SectionNames, "`n") ; save section names to array
+	for k, v in SectionArray { ; load preset
+		IniRead, ini, %PresetPath%, %v%
+		IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
 	}
 	WinClose, StatMonitor.ahk ahk_class AutoHotkey
 	WinClose, background.ahk ahk_class AutoHotkey
@@ -9168,6 +9155,7 @@ nm_TabSettingsLock(){
 	GuiControl, disable, NatroSoBrokeHelp
 	GuiControl, disable, PublicFallbackHelp
 	GuiControl, disable, NewWalkHelp
+	GuiControl, disable, ShowPresetButton
 }
 nm_TabSettingsUnLock(){
 	global
@@ -9210,6 +9198,7 @@ nm_TabSettingsUnLock(){
 	GuiControl, enable, NatroSoBrokeHelp
 	GuiControl, enable, PublicFallbackHelp
 	GuiControl, enable, NewWalkHelp
+	GuiControl, enable, ShowPresetButton
 }
 nm_TabMiscLock(){
 	GuiControl, disable, BasicEggHatcherButton
