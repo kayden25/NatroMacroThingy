@@ -4123,20 +4123,9 @@ nm_OverwritePreset() {
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
-	loop 4 {
-		ErrorCheck := (A_Index=1 && PresetName="") ? 1
-			: (A_Index=2 && PresetName="No Presets") ? 1
-			: (A_Index=3 && !FileExist(PresetPath)) ? 1 
-			: (A_Index=4 && FileExist(A_WorkingDir "\settings\presets\" SetPresetName ".ini")) ? 1 : 0
-		ErrorMsg := (A_Index=1) ? "No preset selected."
-			: (A_Index=2) ? "No presets created."
-			: (A_Index=3) ? "Preset " . PresetName . " does not exist."
-			: (A_Index=4) ? "A preset with the name " SetPresetName " already exists. Please choose a different name."
-			: "Unknown Error"
-		if (ErrorCheck) {
-			MsgBox ,,, %ErrorMsg%, 5
-			return
-		}
+	if (FileExist(A_WorkingDir "\settings\presets\" SetPresetName ".ini") && SetPresetName!=PresetName) {
+		MsgBox ,,, A preset with the name %SetPresetName% already exists. Please choose a different name., 5
+		return
 	}
 	MsgBox , 4,,Do you want to overwrite %PresetName%?
 	IfMsgBox no
@@ -4231,6 +4220,56 @@ nm_LoadPreset() {
 	nm_SaveGui()
 	reload
 	Sleep, 10000
+}
+nm_CopyPreset() {
+	GuiControlGet, PresetSelect
+	PresetName := PresetSelect
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
+	loop 3 {
+		ErrorCheck := (A_Index=1 && PresetName="") ? 1
+			: (A_Index=2 && PresetName="No Presets") ? 1
+			: (A_Index=3 && !FileExist(PresetPath)) ? 1 : 0
+		ErrorMsg := (A_Index=1) ? "No preset selected."
+			: (A_Index=2) ? "No presets created."
+			: (A_Index=3) ? "Preset " PresetName "does not exist."
+			: "Unknown Error"
+		if (ErrorCheck) {
+			MsgBox ,,, %ErrorMsg%, 5
+			return
+		}
+	}
+	FileRead, Clipboard, %PresetPath%
+}
+nm_PastePreset() {
+	WinGetPos, gx, gy, gw, gh, Preset Settings
+	InputBox, PresetInput, Import, Enter name:,, 120, 120, % gx+95, % gy-22
+	PresetPath := A_WorkingDir . "\settings\presets\" . PresetInput . ".ini"
+	loop 2 {
+		ErrorCheck := (A_Index=1 && PresetInput="") ? 1
+			: (A_Index=2 && PresetInput="No Presets") ? 1 : 0
+		ErrorMsg := (A_Index=1) ? "No preset name given."
+			: (A_Index=2) ? "You can't create no preset. Use a different name."
+			: "Unknown Error"
+		if (ErrorCheck) {
+			MsgBox,,, %ErrorMsg%, 5
+		}
+	}
+	if (FileExist(PresetPath)) {
+		MsgBox, 4,, Do you want to overwrite %PresetInput%?
+		IfMsgBox, No
+			return
+		nm_CreatePresetFiles(PresetInput, 2)
+	}
+	FileAppend, %ClipboardAll%, %PresetPath%
+	presetlist := "|" ; setting new presets to selection
+	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
+		{
+			if (A_LoopFileName!="") {
+				SplitPath, A_LoopFileName,,,, FileName
+				presetlist .= FileName . "|"
+			}
+		}
+	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_showAdvancedSettings(){
 	global BuffDetectReset
@@ -21950,14 +21989,30 @@ Gui, PresetMain:Add, Button, gnm_DeletePreset x197 y51 w90 h21, &Delete
 Gui, PresetMain:Add, Button, x197 y28 w90 h21 gOverwritePresetGui, Overwrite
 Gui, PresetMain:Add, Button, x90 y174 w120 h21 gnm_LoadPreset, Load Preset
 Gui, PresetMain:Add, DropDownList, x197 y5 w90 choose1 vPresetSelect, % ((presetlist = "|") ? "No Presets|" : presetlist)
-Gui, PresetMain:Add, Button, x110 y128 w80 h23, Import
-Gui, PresetMain:Add, Button, x110 y151 w80 h23, Export
+Gui, PresetMain:Add, Button, x110 y128 w80 h23 gnm_PastePreset, Import
+Gui, PresetMain:Add, Button, x110 y151 w80 h23 gnm_CopyPreset, Export
 
 return
 CreatePresetGui:
 nm_PresetPopup()
 return
 OverwritePresetGui:
+GuiControlGet, PresetSelect
+PresetName := PresetSelect
+PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
+loop 3 {
+	ErrorCheck := (A_Index=1 && PresetName="") ? 1
+		: (A_Index=2 && PresetName="No Presets") ? 1
+		: (A_Index=3 && !FileExist(PresetPath)) ? 1 : 0
+	ErrorMsg := (A_Index=1) ? "No preset selected."
+		: (A_Index=2) ? "No presets created."
+		: (A_Index=3) ? "Preset " . PresetName . " does not exist."
+		: "Unknown Error"
+	if (ErrorCheck) {
+		MsgBox ,,, %ErrorMsg%, 5
+		return
+	}
+}
 nm_PresetPopup(1)
 return
 nm_PresetPopup(type:=0) {
