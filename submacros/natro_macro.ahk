@@ -21993,6 +21993,7 @@ Gui, PresetMain:Add, Button, x110 y128 w80 h23 gnm_PastePreset, Import
 Gui, PresetMain:Add, Button, x110 y151 w80 h23 gnm_CopyPreset, Export
 
 return
+
 CreatePresetGui:
 nm_PresetPopup()
 return
@@ -22019,7 +22020,7 @@ nm_PresetPopup(type:=0) {
 	global
 	WinGetPos, gx, gy, gw, gh, Preset Settings
 	Gui, PresetCreation:New
-	Gui, PresetCreation:Show, % "x" gx+95 " y" gy-22 " w140 h259", Create
+	Gui, PresetCreation:Show, % "x" gx+95 " y" gy-22 " w150 h282", Create
 	Gui, PresetCreation:Font, s9, Segoe UI
 
 	Gui, PresetCreation:Add, Edit, hWndhEdtValue x10 y0 w120 h21 vSetPresetName
@@ -22027,20 +22028,20 @@ nm_PresetPopup(type:=0) {
 		Gui, PresetCreation:Add, Button, gnm_OverwritePreset x10 y238 w120 h21, Overwrite
 		SendMessage 0x1501, 1, "Rename",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
 	} else {
-		Gui, PresetCreation:Add, Button, gnm_CreatePreset x10 y238 w120 h21, Create
+		Gui, PresetCreation:Add, Button, gnm_CreatePreset x10 y261 w120 h21, Create
 		SendMessage 0x1501, 1, "Name",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
 	}
-	Gui, PresetCreation:Add, Button, gnm_CreatePreset x10 y238 w120 h21, %button%
 
-	Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 +Checked vPresetGather, Gather
-	Gui, PresetCreation:Add, CheckBox, x10 y70 w120 h23 +Checked vPresetKill, Kill
-	Gui, PresetCreation:Add, CheckBox, x10 y118 w120 h23 +Checked vPresetQuest, Quest
-	Gui, PresetCreation:Add, CheckBox, x10 y46 w120 h23 +Checked vPresetCollect, Collect
-	Gui, PresetCreation:Add, CheckBox, x10 y94 w120 h23 +Checked vPresetBoost, Boost
-	Gui, PresetCreation:Add, CheckBox, x10 y142 w120 h23 +Checked vPresetPlanters, Planters
-	Gui, PresetCreation:Add, CheckBox, x10 y166 w120 h23 vPresetDiscord, Discord
-	Gui, PresetCreation:Add, CheckBox, x10 y190 w120 h23 +Checked vPresetSettings, Settings
-	Gui, PresetCreation:Add, CheckBox, x10 y214 w120 h23 +Checked vPresetMisc, Misc
+	Gui, PresetCreation:Add, CheckBox, x20 y46 w120 h23 +Checked vPresetGather, Gather
+	Gui, PresetCreation:Add, CheckBox, x20 y94 w120 h23 +Checked vPresetKill, Kill
+	Gui, PresetCreation:Add, CheckBox, x20 y142 w120 h23 +Checked vPresetQuest, Quest
+	Gui, PresetCreation:Add, CheckBox, x20 y70 w120 h23 +Checked vPresetCollect, Collect
+	Gui, PresetCreation:Add, CheckBox, x20 y118 w120 h23 +Checked vPresetBoost, Boost
+	Gui, PresetCreation:Add, CheckBox, x20 y166 w120 h23 +Checked vPresetPlanters, Planters
+	Gui, PresetCreation:Add, CheckBox, x20 y190 w120 h23 vPresetDiscord, Discord
+	Gui, PresetCreation:Add, CheckBox, x20 y214 w120 h23 +Checked vPresetSettings, Settings
+	Gui, PresetCreation:Add, CheckBox, x20 y238 w120 h23 +Checked vPresetMisc, Misc
+    Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23, All
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
