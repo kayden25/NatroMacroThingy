@@ -22078,10 +22078,16 @@ Gui, PresetMain:Add, Button, gnm_DeletePreset x197 y51 w90 h21 vDeletePreset, &D
 Gui, PresetMain:Add, Button, x197 y28 w90 h21 gOverwritePresetGui vOverwritePresetGui, Overwrite
 Gui, PresetMain:Add, Button, x90 y174 w120 h21 gnm_LoadPreset vLoadPreset, Load Preset
 Gui, PresetMain:Add, DropDownList, x197 y5 w90 choose1 vPresetSelect, % ((presetlist = "|") ? "No Presets|" : presetlist)
+Gui, PresetMain:Add, Button, x145 y92.5 w10 h15 gHelpSection, ?
 Gui, PresetMain:Add, Button, x110 y128 w80 h23 gnm_ImportPreset vImportPreset, Import
 Gui, PresetMain:Add, Button, x110 y151 w80 h23 gnm_CopyPreset vCopyPreset, Export
 
 return
+
+HelpSection:
+MsgBox, , Help, Cheese :3
+return
+
 PresetAll:
 SwitchVar := (SwitchVar) ? 0 : 1
 GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetGather
@@ -22091,6 +22097,7 @@ GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetCollect
 GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetBoost
 GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetPlanters
 GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetDiscord
+GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetPrivateServer
 GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetSettings
 GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetMisc
 GuiControl,, PresetGather, 1
@@ -22100,6 +22107,7 @@ GuiControl,, PresetCollect, 1
 GuiControl,, PresetBoost, 1
 GuiControl,, PresetPlanters, 1
 GuiControl,, PresetDiscord, % (SwitchVar ? 1 : 0)
+GuiControl,, PresetPrivateServer, 1
 GuiControl,, PresetSettings, 1
 GuiControl,, PresetMisc, 1
 return
@@ -22132,12 +22140,12 @@ nm_PresetPopup(type:=0) {
 	global
 	WinGetPos, gx, gy, gw, gh, Preset Settings
 	Gui, PresetCreation:New
-	Gui, PresetCreation:Show, % "x" gx+95 " y" gy-22 " w150 h282", Create
+	Gui, PresetCreation:Show, % "x" gx+95 " y" gy-22 " w150 h306", Create
 	Gui, PresetCreation:Font, s9, Segoe UI
 
 	Gui, PresetCreation:Add, Edit, hWndhEdtValue x10 y0 w120 h21 vSetPresetName
 	Gui, PresetCreation:Add, Button, gnm_OverwritePreset x10 y261 w120 h21 vOverwrite, Overwrite
-	Gui, PresetCreation:Add, Button, gnm_CreatePreset x10 y261 w120 h21 vCreate, Create
+	Gui, PresetCreation:Add, Button, gnm_CreatePreset x15 y285 w120 h21 vCreate, Create
 	if (type=1) {
 		GuiControl, Disable, Create
 		GuiControl, Hide, Create
@@ -22154,11 +22162,23 @@ nm_PresetPopup(type:=0) {
 	Gui, PresetCreation:Add, CheckBox, x20 y70 w120 h23 +Checked vPresetCollect, Collect
 	Gui, PresetCreation:Add, CheckBox, x20 y118 w120 h23 +Checked vPresetBoost, Boost
 	Gui, PresetCreation:Add, CheckBox, x20 y166 w120 h23 +Checked vPresetPlanters, Planters
-	Gui, PresetCreation:Add, CheckBox, x20 y190 w120 h23 vPresetDiscord, Discord
-	Gui, PresetCreation:Add, CheckBox, x20 y214 w120 h23 +Checked vPresetSettings, Settings
-	Gui, PresetCreation:Add, CheckBox, x20 y238 w120 h23 +Checked vPresetMisc, Misc
+	Gui, PresetCreation:Add, CheckBox, x20 y190 w120 h23 vPresetDiscord gConfirmDiscord, Discord
+    Gui, PresetCreation:Add, CheckBox, x20 y214 w120 h23 vPresetPrivateServer, Private Server Link
+	Gui, PresetCreation:Add, CheckBox, x20 y238 w120 h23 +Checked vPresetSettings, Settings
+	Gui, PresetCreation:Add, CheckBox, x20 y262 w120 h23 +Checked vPresetMisc, Misc
     Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 gPresetAll vPresetAll, All
 }
+
+ConfirmDiscord:
+Gui, Submit, NoHide
+if (PresetDiscord = 1)
+    MsgBox, 4, Discord Confirmation, Are you sure you would like to save your Discord Settings?
+    GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetDiscord
+    IfMsgBox, Yes
+        return
+    IfMsgBox, No
+        GuiControl,, PresetDiscord, % (SwitchVar ? 1 : 0)
+return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; HOTKEYS
