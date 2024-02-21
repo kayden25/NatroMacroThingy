@@ -4041,7 +4041,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 		PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 		PresetArray := {} ; array to determin what to save to preset
 		PresetArray["Gather"] := PresetGather
-		; Work in progress: PresetArray["Kill"] := PresetKill
+		PresetArray["Kill"] := PresetKill
 		PresetArray["Quests"] := PresetQuest
 		PresetArray["Collect"] := PresetCollect
 		PresetArray["Blender"] := PresetCollect
@@ -4050,7 +4050,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 		PresetArray["Gui"] := PresetPlanters
 		PresetArray["Status"] := PresetDiscord
 		PresetArray["Settings"] := PresetSettings
-		; Work in progress: PresetArray["Misc"] := PresetMisc
+		PresetArray["Misc"] := PresetMisc
 		IniRead, planterSectionNames, %A_WorkingDir%\settings\manual_planters.ini
 		PlanterSections := StrSplit(planterSectionNames, "`n") ; get manual panters ini
 		IniRead, fieldSectionNames, %A_WorkingDir%\settings\field_config.ini
@@ -4065,16 +4065,30 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 								IniWrite, %ini%, %PresetPath%, %y%
 							}
 						}
-						if (k="Gather") { ; save field defaults
+						else if (k="Gather") { ; save field defaults
 							for x, y in FieldSections { 
 								IniRead, ini, %A_WorkingDir%\settings\field_config.ini, %y%
 								IniWrite, %ini%, %PresetPath%, %y%
 							}
 						}
+						else if (k="Misc" || k="Kill") {
+							continue
+						}
 						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
 						IniWrite, %ini%, %PresetPath%, %k%
 					}
 				}
+				if (PresetArray["Misc"]=0) {
+					MiscArray := ["TimersHotkey", "StopHotkey", "StartHotkey", "PauseHotkey", "AutoClickerHotkey", "AnnounceGuidingStar", "ClickCount", "ClickDelay", "ClickDuration", "ClickMode"]
+					For k, v in MiscArray
+						IniDelete, %PresetPath%, Settings, %v%
+				}
+				if (PresetArray["Kill"]=0) {
+					KillArray := ["VBLastKilled", "TunnelBearCheck", "TunnelBearBabyCheck", "StumpSnailCheck", "StingerSpiderCheck", "StingerRoseCheck", "StingerPepperCheck", "StingerMountainTopCheck", "StingerDailyBonusCheck", "StingerCloverCheck", "StingerCheck", "StingerCactusCheck", "SnailTime", "ShellAmuletMode", "NightLastDetected", "MonsterRespawnTime", "MondoLootDirection", "LastTunnelBear", "LastKingBeetle", "LastCommando", "LastCocoCrab", "LastBugrunWerewolf", "LastBugrunSpider", "LastBugrunScorpions", "LastBugrunRhinoBeetles", "LastBugrunMantis", "LastBugrunLadybugs", "KingBeetleCheck", "KingBeetleBabyCheck", "KingBeetleAmuletMode", "InputSnailHealth", "InputChickHealth", "CommandoCheck", "CocoCrabCheck", "ChickTime", "BugrunWerewolfLoot", "BugrunWerewolfCheck", "BugrunSpiderLoot", "BugrunSpiderCheck", "BugrunScorpionsLoot", "BugrunScorpionsCheck", "BugrunRhinoBeetlesLoot", "BugrunRhinoBeetlesCheck", "BugrunMantisLoot", "BugrunMantisCheck", "BugrunLadybugsLoot", "BugrunLadybugsCheck", "BugrunInterruptCheck", "BugRunCheck"]
+					For k, v in KillArray
+						IniDelete, %PresetPath%, Collect, %v%
+				}
+				sleep 5000
 			case 2: ; delete preset file
 				FileDelete, %PresetPath%
 		}
@@ -4082,6 +4096,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 }
 nm_CreatePreset() {
 	GuiControlGet, SetPresetName
+	gui, PresetMain:Default
 	PresetName := SetPresetName
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
@@ -4102,6 +4117,9 @@ nm_CreatePreset() {
 			return
 		nm_CreatePresetFiles(PresetName, 2)
 	}
+	nm_PresetLock()
+	gui, PresetCreation:Default
+	nm_CreatePresetLock()
 	nm_CreatePresetFiles(PresetName, 1)
 
 	presetlist := "|" ; setting new presets to selection
@@ -4112,8 +4130,9 @@ nm_CreatePreset() {
 				presetlist .= FileName . "|"
 			}
 		}
-	Gui, PresetCreation:destroy
 	gui, PresetMain:Default
+	nm_PresetUnLock()
+	Gui, PresetCreation:destroy
 	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_OverwritePreset() {
@@ -4132,9 +4151,14 @@ nm_OverwritePreset() {
 		return
 	nm_CreatePresetFiles(PresetName, 2)
 	if (SetPresetName!="") {
+		nm_PresetLock()
+		gui, PresetCreation:Default
+		nm_CreatePresetLock()
 		nm_CreatePresetFiles(SetPresetName, 1)
 	} 
 	else {
+		nm_PresetLock()
+		nm_CreatePresetLock()
 		nm_CreatePresetFiles(PresetName, 1)
 	}
 	presetlist := "|" ; setting new presets to selection
@@ -4145,6 +4169,8 @@ nm_OverwritePreset() {
 				presetlist .= FileName . "|"
 			}
 		}
+	gui, PresetMain:Default
+	nm_PresetUnLock()
 	Gui, PresetCreation:destroy
 	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
@@ -4240,7 +4266,7 @@ nm_CopyPreset() {
 	}
 	FileRead, Clipboard, %PresetPath%
 }
-nm_PastePreset() {
+nm_ImportPreset() {
 	WinGetPos, gx, gy, gw, gh, Preset Settings
 	InputBox, PresetInput, Import, Enter name:,, 120, 120, % gx+95, % gy-22
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetInput . ".ini"
@@ -4260,7 +4286,15 @@ nm_PastePreset() {
 			return
 		nm_CreatePresetFiles(PresetInput, 2)
 	}
-	FileAppend, %ClipboardAll%, %PresetPath%
+	FormatCheck := A_WorkingDir . "\settings\presets\formatcheck.ini"
+	FileAppend, %ClipboardAll%, %FormatCheck%
+	IniRead, SectionNames, %FormatCheck%
+	SectionArray := StrSplit(SectionNames, "`n") ; save section names to array
+	for k, v in SectionArray {
+		IniRead, ini, %FormatCheck%, %k%
+		IniWrite, %ini%, %PresetPath%, %k%
+	}
+	FileDelete, %FormatCheck%
 	presetlist := "|" ; setting new presets to selection
 	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
@@ -9299,6 +9333,54 @@ nm_TabMiscUnLock(){
 	GuiControl, enable, NightAnnouncementGUI
 	GuiControl, enable, ReportBugButton
 	GuiControl, enable, MakeSuggestionButton
+}
+nm_PresetLock(){
+	GuiControl, disable, CreatePresetGui
+	GuiControl, disable, DeletePreset
+	GuiControl, disable, OverwritePresetGui
+	GuiControl, disable, LoadPreset
+	GuiControl, disable, PresetSelect
+	GuiControl, disable, ImportPreset
+	GuiControl, disable, CopyPreset
+	
+}
+nm_PresetUnLock(){
+	GuiControl, enable, CreatePresetGui
+	GuiControl, enable, DeletePreset
+	GuiControl, enable, OverwritePresetGui
+	GuiControl, enable, LoadPreset
+	GuiControl, enable, PresetSelect
+	GuiControl, enable, ImportPreset
+	GuiControl, enable, CopyPreset
+}
+nm_CreatePresetLock(){
+	GuiControl, disable, Create
+	GuiControl, disable, Overwrite
+	GuiControl, disable, SetPresetName
+	GuiControl, disable, PresetGather
+	GuiControl, disable, PresetKill
+	GuiControl, disable, PresetQuest
+	GuiControl, disable, PresetCollect
+	GuiControl, disable, PresetBoost
+	GuiControl, disable, PresetPlanters
+	GuiControl, disable, PresetDiscord
+	GuiControl, disable, PresetSettings
+	GuiControl, disable, PresetMisc
+	GuiControl, disable, PresetAll
+}
+nm_CreatePresetUnLock(){
+	GuiControl, enable, Create
+	GuiControl, enable, Overwrite
+	GuiControl, enable, PresetGather
+	GuiControl, enable, PresetKill
+	GuiControl, enable, PresetQuest
+	GuiControl, enable, PresetCollect
+	GuiControl, enable, PresetBoost
+	GuiControl, enable, PresetPlanters
+	GuiControl, enable, PresetDiscord
+	GuiControl, enable, PresetSettings
+	GuiControl, enable, PresetMisc
+	GuiControl, enable, PresetAll
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FUNCTIONS
@@ -21978,25 +22060,54 @@ nm_setStats()
 return
 
 showPresetGUI:
-
+presetlist := "|" ; setting new presets to selection
+	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
+		{
+			if (A_LoopFileName!="") {
+				SplitPath, A_LoopFileName,,,, FileName
+				presetlist .= FileName . "|"
+			}
+		}
 WinGetPos, gx, gy, gw, gh, Natro Macro
 Gui, PresetMain:New
 Gui, PresetMain:Show, % "x" gx+85 " y" gy+35 " w300 h200", Preset Settings
 
 Gui, PresetMain:Font, s9, Segoe UI
-Gui, PresetMain:Add, Button, x13 y5 w90 h21 gCreatePresetGui, Create New
-Gui, PresetMain:Add, Button, gnm_DeletePreset x197 y51 w90 h21, &Delete
-Gui, PresetMain:Add, Button, x197 y28 w90 h21 gOverwritePresetGui, Overwrite
-Gui, PresetMain:Add, Button, x90 y174 w120 h21 gnm_LoadPreset, Load Preset
+Gui, PresetMain:Add, Button, x13 y5 w90 h21 gCreatePresetGui vCreatePresetGui, Create New
+Gui, PresetMain:Add, Button, gnm_DeletePreset x197 y51 w90 h21 vDeletePreset, &Delete
+Gui, PresetMain:Add, Button, x197 y28 w90 h21 gOverwritePresetGui vOverwritePresetGui, Overwrite
+Gui, PresetMain:Add, Button, x90 y174 w120 h21 gnm_LoadPreset vLoadPreset, Load Preset
 Gui, PresetMain:Add, DropDownList, x197 y5 w90 choose1 vPresetSelect, % ((presetlist = "|") ? "No Presets|" : presetlist)
-Gui, PresetMain:Add, Button, x110 y128 w80 h23 gnm_PastePreset, Import
-Gui, PresetMain:Add, Button, x110 y151 w80 h23 gnm_CopyPreset, Export
+Gui, PresetMain:Add, Button, x110 y128 w80 h23 gnm_ImportPreset vImportPreset, Import
+Gui, PresetMain:Add, Button, x110 y151 w80 h23 gnm_CopyPreset vCopyPreset, Export
 
+return
+PresetAll:
+SwitchVar := (SwitchVar) ? 0 : 1
+GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetGather
+GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetKill
+GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetQuest
+GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetCollect
+GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetBoost
+GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetPlanters
+GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetDiscord
+GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetSettings
+GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetMisc
+GuiControl,, PresetGather, 1
+GuiControl,, PresetKill, 1
+GuiControl,, PresetQuest, 1
+GuiControl,, PresetCollect, 1
+GuiControl,, PresetBoost, 1
+GuiControl,, PresetPlanters, 1
+GuiControl,, PresetDiscord, % (SwitchVar ? 1 : 0)
+GuiControl,, PresetSettings, 1
+GuiControl,, PresetMisc, 1
 return
 
 CreatePresetGui:
 nm_PresetPopup()
 return
+
 OverwritePresetGui:
 GuiControlGet, PresetSelect
 PresetName := PresetSelect
@@ -22016,6 +22127,7 @@ loop 3 {
 }
 nm_PresetPopup(1)
 return
+
 nm_PresetPopup(type:=0) {
 	global
 	WinGetPos, gx, gy, gw, gh, Preset Settings
@@ -22024,11 +22136,15 @@ nm_PresetPopup(type:=0) {
 	Gui, PresetCreation:Font, s9, Segoe UI
 
 	Gui, PresetCreation:Add, Edit, hWndhEdtValue x10 y0 w120 h21 vSetPresetName
+	Gui, PresetCreation:Add, Button, gnm_OverwritePreset x10 y261 w120 h21 vOverwrite, Overwrite
+	Gui, PresetCreation:Add, Button, gnm_CreatePreset x10 y261 w120 h21 vCreate, Create
 	if (type=1) {
-		Gui, PresetCreation:Add, Button, gnm_OverwritePreset x10 y238 w120 h21, Overwrite
+		GuiControl, Disable, Create
+		GuiControl, Hide, Create
 		SendMessage 0x1501, 1, "Rename",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
 	} else {
-		Gui, PresetCreation:Add, Button, gnm_CreatePreset x10 y261 w120 h21, Create
+		GuiControl, Disable, Overwrite
+		GuiControl, Hide, Overwrite
 		SendMessage 0x1501, 1, "Name",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
 	}
 
@@ -22041,7 +22157,7 @@ nm_PresetPopup(type:=0) {
 	Gui, PresetCreation:Add, CheckBox, x20 y190 w120 h23 vPresetDiscord, Discord
 	Gui, PresetCreation:Add, CheckBox, x20 y214 w120 h23 +Checked vPresetSettings, Settings
 	Gui, PresetCreation:Add, CheckBox, x20 y238 w120 h23 +Checked vPresetMisc, Misc
-    Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23, All
+    Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 gPresetAll vPresetAll, All
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
