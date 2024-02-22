@@ -22157,16 +22157,20 @@ nm_PresetPopup(type:=0) {
 	}
 
 	Gui, PresetCreation:Add, CheckBox, x20 y46 w120 h23 +Checked vPresetGather, Gather
-	Gui, PresetCreation:Add, CheckBox, x20 y94 w120 h23 +Checked vPresetKill, Kill
+	Gui, PresetCreation:Add, CheckBox, x20 y94 w59 h23 +Checked vPresetKill, Kill
 	Gui, PresetCreation:Add, CheckBox, x20 y142 w120 h23 +Checked vPresetQuest, Quest
-	Gui, PresetCreation:Add, CheckBox, x20 y70 w120 h23 +Checked vPresetCollect, Collect
-	Gui, PresetCreation:Add, CheckBox, x20 y118 w120 h23 +Checked vPresetBoost, Boost
-	Gui, PresetCreation:Add, CheckBox, x20 y166 w120 h23 +Checked vPresetPlanters, Planters
+	Gui, PresetCreation:Add, CheckBox, x20 y70 w59 h23 +Checked vPresetCollect, Collect
+	Gui, PresetCreation:Add, CheckBox, x20 y118 w59 h23 +Checked vPresetBoost, Boost
+	Gui, PresetCreation:Add, CheckBox, x20 y166 w59 h23 +Checked vPresetPlanters, Planters
 	Gui, PresetCreation:Add, CheckBox, x20 y190 w120 h23 vPresetDiscord gConfirmDiscord, Discord
     Gui, PresetCreation:Add, CheckBox, x20 y214 w120 h23 vPresetPrivateServer, Private Server Link
 	Gui, PresetCreation:Add, CheckBox, x20 y238 w120 h23 +Checked vPresetSettings, Settings
 	Gui, PresetCreation:Add, CheckBox, x20 y262 w120 h23 +Checked vPresetMisc, Misc
     Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 gPresetAll vPresetAll, All
+    Gui, PresetCreation:Add, CheckBox, x81 y70 w59 h23, Timers
+    Gui, PresetCreation:Add, CheckBox, x81 y94 w59 h23, Timers
+    Gui, PresetCreation:Add, CheckBox, x81 y118 w59 h23, Timers
+    Gui, PresetCreation:Add, CheckBox, x81 y166 w59 h23, Timers
 }
 
 ConfirmDiscord:
