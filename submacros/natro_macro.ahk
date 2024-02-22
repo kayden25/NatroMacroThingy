@@ -4034,6 +4034,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 	GuiControlGet, PresetDiscord
 	GuiControlGet, PresetSettings
 	GuiControlGet, PresetMisc
+	GuiControlGet, PresetPrivateServer
 	if (!FileExist(A_WorkingDir "\settings\presets")) {
 		FileCreateDir, %A_WorkingDir%\settings\presets
 	}
@@ -4051,6 +4052,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 		PresetArray["Status"] := PresetDiscord
 		PresetArray["Settings"] := PresetSettings
 		PresetArray["Misc"] := PresetMisc
+		PresetArray["Private Server"] := PresetPrivateServer
 		IniRead, planterSectionNames, %A_WorkingDir%\settings\manual_planters.ini
 		PlanterSections := StrSplit(planterSectionNames, "`n") ; get manual panters ini
 		IniRead, fieldSectionNames, %A_WorkingDir%\settings\field_config.ini
@@ -4071,7 +4073,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 								IniWrite, %ini%, %PresetPath%, %y%
 							}
 						}
-						else if (k="Misc" || k="Kill") {
+						else if (k="Misc" || k="Kill" || k="Private Server") {
 							continue
 						}
 						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
@@ -4088,7 +4090,11 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 					For k, v in KillArray
 						IniDelete, %PresetPath%, Collect, %v%
 				}
-				sleep 5000
+				if (PresetArray["Private Server"]=0) {
+					ServerArray := ["FallbackServer1", "FallbackServer2", "FallbackServer3", "PrivServer"]
+					For k, v in ServerArray
+						IniDelete, %PresetPath%, Settings, %v%
+				}
 			case 2: ; delete preset file
 				FileDelete, %PresetPath%
 		}
@@ -4096,7 +4102,6 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 }
 nm_CreatePreset() {
 	GuiControlGet, SetPresetName
-	gui, PresetMain:Default
 	PresetName := SetPresetName
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
@@ -4118,7 +4123,6 @@ nm_CreatePreset() {
 		nm_CreatePresetFiles(PresetName, 2)
 	}
 	nm_PresetLock()
-	gui, PresetCreation:Default
 	nm_CreatePresetLock()
 	nm_CreatePresetFiles(PresetName, 1)
 
@@ -4137,8 +4141,7 @@ nm_CreatePreset() {
 }
 nm_OverwritePreset() {
 	GuiControlGet, SetPresetName
-	gui, PresetMain:Default
-	GuiControlGet, PresetSelect
+	GuiControlGet, PresetSelect, PresetMain:
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
@@ -4150,15 +4153,12 @@ nm_OverwritePreset() {
 	IfMsgBox no
 		return
 	nm_CreatePresetFiles(PresetName, 2)
+	nm_PresetLock()
+	nm_CreatePresetLock()
 	if (SetPresetName!="") {
-		nm_PresetLock()
-		gui, PresetCreation:Default
-		nm_CreatePresetLock()
 		nm_CreatePresetFiles(SetPresetName, 1)
 	} 
 	else {
-		nm_PresetLock()
-		nm_CreatePresetLock()
 		nm_CreatePresetFiles(PresetName, 1)
 	}
 	presetlist := "|" ; setting new presets to selection
@@ -4169,10 +4169,9 @@ nm_OverwritePreset() {
 				presetlist .= FileName . "|"
 			}
 		}
-	gui, PresetMain:Default
-	nm_PresetUnLock()
 	Gui, PresetCreation:destroy
-	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
+	nm_PresetUnLock()
+	GuiControl, PresetMain:, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_DeletePreset() {
 	GuiControlGet, PresetSelect
@@ -9335,52 +9334,54 @@ nm_TabMiscUnLock(){
 	GuiControl, enable, MakeSuggestionButton
 }
 nm_PresetLock(){
-	GuiControl, disable, CreatePresetGui
-	GuiControl, disable, DeletePreset
-	GuiControl, disable, OverwritePresetGui
-	GuiControl, disable, LoadPreset
-	GuiControl, disable, PresetSelect
-	GuiControl, disable, ImportPreset
-	GuiControl, disable, CopyPreset
+	GuiControl, PresetMain:disable, CreatePresetGui
+	GuiControl, PresetMain:disable, DeletePreset
+	GuiControl, PresetMain:disable, OverwritePresetGui
+	GuiControl, PresetMain:disable, LoadPreset
+	GuiControl, PresetMain:disable, PresetSelect
+	GuiControl, PresetMain:disable, ImportPreset
+	GuiControl, PresetMain:disable, CopyPreset
 	
 }
 nm_PresetUnLock(){
-	GuiControl, enable, CreatePresetGui
-	GuiControl, enable, DeletePreset
-	GuiControl, enable, OverwritePresetGui
-	GuiControl, enable, LoadPreset
-	GuiControl, enable, PresetSelect
-	GuiControl, enable, ImportPreset
-	GuiControl, enable, CopyPreset
+	GuiControl, PresetMain:enable, CreatePresetGui
+	GuiControl, PresetMain:enable, DeletePreset
+	GuiControl, PresetMain:enable, OverwritePresetGui
+	GuiControl, PresetMain:enable, LoadPreset
+	GuiControl, PresetMain:enable, PresetSelect
+	GuiControl, PresetMain:enable, ImportPreset
+	GuiControl, PresetMain:enable, CopyPreset
 }
 nm_CreatePresetLock(){
-	GuiControl, disable, Create
-	GuiControl, disable, Overwrite
-	GuiControl, disable, SetPresetName
-	GuiControl, disable, PresetGather
-	GuiControl, disable, PresetKill
-	GuiControl, disable, PresetQuest
-	GuiControl, disable, PresetCollect
-	GuiControl, disable, PresetBoost
-	GuiControl, disable, PresetPlanters
-	GuiControl, disable, PresetDiscord
-	GuiControl, disable, PresetSettings
-	GuiControl, disable, PresetMisc
-	GuiControl, disable, PresetAll
+	GuiControl, PresetCreation:disable, Create
+	GuiControl, PresetCreation:disable, Overwrite
+	GuiControl, PresetCreation:disable, SetPresetName
+	GuiControl, PresetCreation:disable, PresetGather
+	GuiControl, PresetCreation:disable, PresetKill
+	GuiControl, PresetCreation:disable, PresetQuest
+	GuiControl, PresetCreation:disable, PresetCollect
+	GuiControl, PresetCreation:disable, PresetBoost
+	GuiControl, PresetCreation:disable, PresetPlanters
+	GuiControl, PresetCreation:disable, PresetDiscord
+	GuiControl, PresetCreation:disable, PresetSettings
+	GuiControl, PresetCreation:disable, PresetMisc
+	GuiControl, PresetCreation:disable, PresetAll
+	GuiControl, PresetCreation:disable, PresetPrivateServer
 }
 nm_CreatePresetUnLock(){
-	GuiControl, enable, Create
-	GuiControl, enable, Overwrite
-	GuiControl, enable, PresetGather
-	GuiControl, enable, PresetKill
-	GuiControl, enable, PresetQuest
-	GuiControl, enable, PresetCollect
-	GuiControl, enable, PresetBoost
-	GuiControl, enable, PresetPlanters
-	GuiControl, enable, PresetDiscord
-	GuiControl, enable, PresetSettings
-	GuiControl, enable, PresetMisc
-	GuiControl, enable, PresetAll
+	GuiControl, PresetCreation:enable, Create
+	GuiControl, PresetCreation:enable, Overwrite
+	GuiControl, PresetCreation:enable, PresetGather
+	GuiControl, PresetCreation:enable, PresetKill
+	GuiControl, PresetCreation:enable, PresetQuest
+	GuiControl, PresetCreation:enable, PresetCollect
+	GuiControl, PresetCreation:enable, PresetBoost
+	GuiControl, PresetCreation:enable, PresetPlanters
+	GuiControl, PresetCreation:enable, PresetDiscord
+	GuiControl, PresetCreation:enable, PresetSettings
+	GuiControl, PresetCreation:enable, PresetMisc
+	GuiControl, PresetCreation:enable, PresetAll
+	GuiControl, PresetCreation:enable, PresetPrivateServer
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FUNCTIONS
@@ -22089,25 +22090,26 @@ MsgBox, , Help, Cheese :3
 return
 
 PresetAll:
-SwitchVar := (SwitchVar) ? 0 : 1
-GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetGather
-GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetKill
-GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetQuest
-GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetCollect
-GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetBoost
-GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetPlanters
-GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetDiscord
-GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetPrivateServer
-GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetSettings
-GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetMisc
+GuiControlGet, PresetAll
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetGather
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetKill
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetQuest
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetCollect
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetBoost
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPlanters
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetDiscord
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPrivateServer
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetSettings
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetMisc
+GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPrivateServer
 GuiControl,, PresetGather, 1
 GuiControl,, PresetKill, 1
 GuiControl,, PresetQuest, 1
 GuiControl,, PresetCollect, 1
 GuiControl,, PresetBoost, 1
 GuiControl,, PresetPlanters, 1
-GuiControl,, PresetDiscord, % (SwitchVar ? 1 : 0)
-GuiControl,, PresetPrivateServer, 1
+GuiControl,, PresetDiscord, % (PresetAll ? 1 : 0)
+GuiControl,, PresetPrivateServer, % (PresetAll ? 1 : 0)
 GuiControl,, PresetSettings, 1
 GuiControl,, PresetMisc, 1
 return
@@ -22144,7 +22146,7 @@ nm_PresetPopup(type:=0) {
 	Gui, PresetCreation:Font, s9, Segoe UI
 
 	Gui, PresetCreation:Add, Edit, hWndhEdtValue x10 y0 w120 h21 vSetPresetName
-	Gui, PresetCreation:Add, Button, gnm_OverwritePreset x10 y261 w120 h21 vOverwrite, Overwrite
+	Gui, PresetCreation:Add, Button, gnm_OverwritePreset x15 y285 w120 h21 vOverwrite, Overwrite
 	Gui, PresetCreation:Add, Button, gnm_CreatePreset x15 y285 w120 h21 vCreate, Create
 	if (type=1) {
 		GuiControl, Disable, Create
@@ -22174,14 +22176,12 @@ nm_PresetPopup(type:=0) {
 }
 
 ConfirmDiscord:
-Gui, Submit, NoHide
-if (PresetDiscord = 1)
-    MsgBox, 4, Discord Confirmation, Are you sure you would like to save your Discord Settings?
-    GuiControl, % (SwitchVar ? "Disable" : "Enable"), PresetDiscord
-    IfMsgBox, Yes
-        return
+GuiControlGet, PresetDiscord
+if (PresetDiscord=1) {
+    MsgBox, 4, Discord Confirmation, Are you sure you would like to enable save Discord Settings?
     IfMsgBox, No
-        GuiControl,, PresetDiscord, % (SwitchVar ? 1 : 0)
+        GuiControl,, PresetDiscord, 0
+}
 return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
