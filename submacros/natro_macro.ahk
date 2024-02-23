@@ -4045,7 +4045,8 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 	if (type!=0) { ;create/delete/overwrite files
 		KillArray := ["TunnelBearCheck", "TunnelBearBabyCheck", "StumpSnailCheck", "StingerSpiderCheck", "StingerRoseCheck", "StingerPepperCheck", "StingerMountainTopCheck", "StingerDailyBonusCheck", "StingerCloverCheck", "StingerCheck", "StingerCactusCheck", "SnailTime", "ShellAmuletMode", "MonsterRespawnTime", "MondoLootDirection", "KingBeetleCheck", "KingBeetleBabyCheck", "KingBeetleAmuletMode", "InputSnailHealth", "InputChickHealth", "CommandoCheck", "CocoCrabCheck", "ChickTime", "BugrunWerewolfLoot", "BugrunWerewolfCheck", "BugrunSpiderLoot", "BugrunSpiderCheck", "BugrunScorpionsLoot", "BugrunScorpionsCheck", "BugrunRhinoBeetlesLoot", "BugrunRhinoBeetlesCheck", "BugrunMantisLoot", "BugrunMantisCheck", "BugrunLadybugsLoot", "BugrunLadybugsCheck", "BugrunInterruptCheck", "BugRunCheck"]
 		KillTimer := ["VBLastKilled", "LastBugrunLadybugs", "LastBugrunMantis", "LastBugrunRhinoBeetles", "LastBugrunScorpions", "LastBugrunSpider", "LastBugrunWerewolf", "LastCommando", "LastKingBeetle", "LastStumpSnail", "LastTunnelBear", "NightLastDetected", "LastCocoCrab"]
-		MiscArray := ["TimersHotkey", "StopHotkey", "StartHotkey", "PauseHotkey", "AutoClickerHotkey", "AnnounceGuidingStar", "ClickCount", "ClickDelay", "ClickDuration", "ClickMode"]
+		MiscArray := ["TimersHotkey", "StopHotkey", "StartHotkey", "PauseHotkey", "AutoClickerHotkey", "ClickCount", "ClickDelay", "ClickDuration", "ClickMode"]
+		MiscDiscord := ["NightAnnouncementCheck", "NightAnnouncementName", "NightAnnouncementPingID", "NightAnnouncementWebhook"]
 		ServerArray := ["FallbackServer1", "FallbackServer2", "FallbackServer3", "PrivServer"]
 		CollectTimer := ["LastAntPass", "LastBlueberryDis", "LastCandles", "LastClock", "LastCoconutDis", "LastFeast", "LastGingerbread", "LastGlueDis", "LastGummyBeacon", "LastHoneyDis", "LastHoneystorm", "LastLidArt", "LastMondoBuff", "LastRBPDelevel", "LastRoboPass", "LastRoyalJellyDis", "LastSamovar", "LastSnowMachine", "LastStockings", "LastStrawberryDis", "LastTreatDis", "LastWreath"]
 		BoostTimer := ["AFBdiceUsed", "AFBglitterUsed", "FieldLastBoosted", "FieldLastBoostedBy", "FieldNextBoostedBy", "LastEnzymes", "LastGlitter", "LastGuid", "LastHotkey2", "LastHotkey3", "LastHotkey4", "LastHotkey5", "LastHotkey6", "LastHotkey7", "LastMicroConverter", "LastSnowflake", "LastStickerPrinter", "LastStickerStack", "LastWhirligig"]
@@ -4094,6 +4095,10 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
 									IniWrite, %PresetPath%, Settings, %y%
 								}
+								For x, y in MiscDiscord {
+									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Status, %y%
+									IniWrite, %PresetPath%, Status, %y%
+								}
 							}
 							else if (k="Kill" && PresetArray["Collect"]=0) {
 								For x, y in KillArray {
@@ -4132,6 +4137,8 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 				if (PresetArray["Misc"]=0 && PresetArray["Settings"]=1) {
 					For k, v in MiscArray
 						IniDelete, %PresetPath%, Settings, %v%
+					For k, v in MiscDiscord
+						IniDelete, %PresetPath%, Status, %v%
 				}
 				if (PresetArray["Kill"]=0 && PresetArray["Collect"]=1) {
 					For k, v in KillArray
