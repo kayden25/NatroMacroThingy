@@ -9451,6 +9451,10 @@ nm_CreatePresetLock(){
 	GuiControl, PresetCreation:disable, PresetMisc
 	GuiControl, PresetCreation:disable, PresetAll
 	GuiControl, PresetCreation:disable, PresetPrivateServer
+	GuiControl, PresetCreation:disable, PresetCollectTimers
+	GuiControl, PresetCreation:disable, PresetBoostTimers
+	GuiControl, PresetCreation:disable, PresetPlanterTimers
+	GuiControl, PresetCreation:disable, PresetKillTimers
 }
 nm_CreatePresetUnLock(){
 	GuiControl, PresetCreation:enable, Create
@@ -9466,6 +9470,10 @@ nm_CreatePresetUnLock(){
 	GuiControl, PresetCreation:enable, PresetMisc
 	GuiControl, PresetCreation:enable, PresetAll
 	GuiControl, PresetCreation:enable, PresetPrivateServer
+	GuiControl, PresetCreation:enable, PresetCollectTimers
+	GuiControl, PresetCreation:enable, PresetBoostTimers
+	GuiControl, PresetCreation:enable, PresetPlanterTimers
+	GuiControl, PresetCreation:enable, PresetKillTimers
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FUNCTIONS
@@ -22186,6 +22194,14 @@ GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPrivateServer
 GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetSettings
 GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetMisc
 GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPrivateServer
+GuiControl, Show, PresetCollectTimers
+GuiControl, Show, PresetBoostTimers
+GuiControl, Show, PresetPlanterTimers
+GuiControl, Show, PresetKillTimers
+GuiControl, Enable, PresetCollectTimers
+GuiControl, Enable, PresetBoostTimers
+GuiControl, Enable, PresetPlanterTimers
+GuiControl, Enable, PresetKillTimers
 GuiControl,, PresetGather, 1
 GuiControl,, PresetKill, 1
 GuiControl,, PresetQuest, 1
