@@ -4035,10 +4035,21 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 	GuiControlGet, PresetSettings
 	GuiControlGet, PresetMisc
 	GuiControlGet, PresetPrivateServer
+	GuiControlGet, PresetCollectTimers
+	GuiControlGet, PresetKillTimers
+	GuiControlGet, PresetBoostTimers
+	GuiControlGet, PresetPlanterTimers
 	if (!FileExist(A_WorkingDir "\settings\presets")) {
 		FileCreateDir, %A_WorkingDir%\settings\presets
 	}
 	if (type!=0) { ;create/delete/overwrite files
+		KillArray := ["TunnelBearCheck", "TunnelBearBabyCheck", "StumpSnailCheck", "StingerSpiderCheck", "StingerRoseCheck", "StingerPepperCheck", "StingerMountainTopCheck", "StingerDailyBonusCheck", "StingerCloverCheck", "StingerCheck", "StingerCactusCheck", "SnailTime", "ShellAmuletMode", "MonsterRespawnTime", "MondoLootDirection", "KingBeetleCheck", "KingBeetleBabyCheck", "KingBeetleAmuletMode", "InputSnailHealth", "InputChickHealth", "CommandoCheck", "CocoCrabCheck", "ChickTime", "BugrunWerewolfLoot", "BugrunWerewolfCheck", "BugrunSpiderLoot", "BugrunSpiderCheck", "BugrunScorpionsLoot", "BugrunScorpionsCheck", "BugrunRhinoBeetlesLoot", "BugrunRhinoBeetlesCheck", "BugrunMantisLoot", "BugrunMantisCheck", "BugrunLadybugsLoot", "BugrunLadybugsCheck", "BugrunInterruptCheck", "BugRunCheck"]
+		KillTimer := ["VBLastKilled", "LastBugrunLadybugs", "LastBugrunMantis", "LastBugrunRhinoBeetles", "LastBugrunScorpions", "LastBugrunSpider", "LastBugrunWerewolf", "LastCommando", "LastKingBeetle", "LastStumpSnail", "LastTunnelBear", "NightLastDetected", "LastCocoCrab"]
+		MiscArray := ["TimersHotkey", "StopHotkey", "StartHotkey", "PauseHotkey", "AutoClickerHotkey", "AnnounceGuidingStar", "ClickCount", "ClickDelay", "ClickDuration", "ClickMode"]
+		ServerArray := ["FallbackServer1", "FallbackServer2", "FallbackServer3", "PrivServer"]
+		CollectTimer := ["LastAntPass", "LastBlueberryDis", "LastCandles", "LastClock", "LastCoconutDis", "LastFeast", "LastGingerbread", "LastGlueDis", "LastGummyBeacon", "LastHoneyDis", "LastHoneystorm", "LastLidArt", "LastMondoBuff", "LastRBPDelevel", "LastRoboPass", "LastRoyalJellyDis", "LastSamovar", "LastSnowMachine", "LastStockings", "LastStrawberryDis", "LastTreatDis", "LastWreath"]
+		BoostTimer := ["AFBdiceUsed", "AFBglitterUsed", "FieldLastBoosted", "FieldLastBoostedBy", "FieldNextBoostedBy", "LastEnzymes", "LastGlitter", "LastGuid", "LastHotkey2", "LastHotkey3", "LastHotkey4", "LastHotkey5", "LastHotkey6", "LastHotkey7", "LastMicroConverter", "LastSnowflake", "LastStickerPrinter", "LastStickerStack", "LastWhirligig"]
+		BoosterTimer := ["LastBlueBoost", "LastMountainBoost", "LastRedBoost"]
 		PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 		PresetArray := {} ; array to determin what to save to preset
 		PresetArray["Gather"] := PresetGather
@@ -4053,6 +4064,10 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 		PresetArray["Settings"] := PresetSettings
 		PresetArray["Misc"] := PresetMisc
 		PresetArray["Private Server"] := PresetPrivateServer
+		PresetArray["CollectTimers"] := PresetCollectTimers
+		PresetArray["KillTimers"] := PresetKillTimers
+		PresetArray["BoostTimers"] := PresetBoostTimers
+		PresetArray["Planters"] := PresetPlanterTimers
 		IniRead, planterSectionNames, %A_WorkingDir%\settings\manual_planters.ini
 		PlanterSections := StrSplit(planterSectionNames, "`n") ; get manual panters ini
 		IniRead, fieldSectionNames, %A_WorkingDir%\settings\field_config.ini
@@ -4073,27 +4088,74 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 								IniWrite, %ini%, %PresetPath%, %y%
 							}
 						}
-						else if (k="Misc" || k="Kill" || k="Private Server") {
+						else if (k="Misc" || k="Kill" || k="Private Server" || k="CollectTimers" || k="KillTimers" || k="BoostTimers") {
+							if (k="Misc" && PresetArray["Settings"]=0) {
+								For x, y in MiscArray {
+									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
+									IniWrite, %PresetPath%, Settings, %y%
+								}
+							}
+							else if (k="Kill" && PresetArray["Collect"]=0) {
+								For x, y in KillArray {
+									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
+									IniWrite, %PresetPath%, Collect, %y%
+								}
+								if (PresetArray["KillTimers"]=1) {
+									For x, y in KillTimer {
+										IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
+										IniWrite, %PresetPath%, Collect, %y%
+									}
+								}
+							}
+							else if (k="Private Server") {
+								For x, y in ServerArray {
+									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
+									IniWrite, %PresetPath%, Settings, %y%
+								}
+							}
+							else if (k="BoostTimers") {
+								For x, y in BoostTimers {
+									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
+									IniWrite, %PresetPath%, Boost, %y%
+								}
+								For x, y in BoosterTimers {
+									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
+									IniWrite, %PresetPath%, Collect, %y%
+								}
+							}
 							continue
 						}
 						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
 						IniWrite, %ini%, %PresetPath%, %k%
 					}
 				}
-				if (PresetArray["Misc"]=0) {
-					MiscArray := ["TimersHotkey", "StopHotkey", "StartHotkey", "PauseHotkey", "AutoClickerHotkey", "AnnounceGuidingStar", "ClickCount", "ClickDelay", "ClickDuration", "ClickMode"]
+				if (PresetArray["Misc"]=0 && PresetArray["Settings"]=1) {
 					For k, v in MiscArray
 						IniDelete, %PresetPath%, Settings, %v%
 				}
-				if (PresetArray["Kill"]=0) {
-					KillArray := ["VBLastKilled", "TunnelBearCheck", "TunnelBearBabyCheck", "StumpSnailCheck", "StingerSpiderCheck", "StingerRoseCheck", "StingerPepperCheck", "StingerMountainTopCheck", "StingerDailyBonusCheck", "StingerCloverCheck", "StingerCheck", "StingerCactusCheck", "SnailTime", "ShellAmuletMode", "NightLastDetected", "MonsterRespawnTime", "MondoLootDirection", "LastTunnelBear", "LastKingBeetle", "LastCommando", "LastCocoCrab", "LastBugrunWerewolf", "LastBugrunSpider", "LastBugrunScorpions", "LastBugrunRhinoBeetles", "LastBugrunMantis", "LastBugrunLadybugs", "KingBeetleCheck", "KingBeetleBabyCheck", "KingBeetleAmuletMode", "InputSnailHealth", "InputChickHealth", "CommandoCheck", "CocoCrabCheck", "ChickTime", "BugrunWerewolfLoot", "BugrunWerewolfCheck", "BugrunSpiderLoot", "BugrunSpiderCheck", "BugrunScorpionsLoot", "BugrunScorpionsCheck", "BugrunRhinoBeetlesLoot", "BugrunRhinoBeetlesCheck", "BugrunMantisLoot", "BugrunMantisCheck", "BugrunLadybugsLoot", "BugrunLadybugsCheck", "BugrunInterruptCheck", "BugRunCheck"]
+				if (PresetArray["Kill"]=0 && PresetArray["Collect"]=1) {
 					For k, v in KillArray
 						IniDelete, %PresetPath%, Collect, %v%
+					For k, v in KillTimer
+						IniDelete, %PresetPath%, Collect, %v%
 				}
-				if (PresetArray["Private Server"]=0) {
-					ServerArray := ["FallbackServer1", "FallbackServer2", "FallbackServer3", "PrivServer"]
+				else if (PresetArray["KillTimers"]=0 && PresetArray["Collect"]=1) {
+					For k, v in KillTimer
+						IniDelete, %PresetPath%, Collect, %v%
+				}
+				if (PresetArray["Private Server"]=0) && PresetArray["Settings"]=1 {
 					For k, v in ServerArray
 						IniDelete, %PresetPath%, Settings, %v%
+				}
+				if (PresetArray["CollectTimers"]=0 && PresetArray["Collect"]=1) {
+					For k, v in CollectTimer
+						IniDelete, %PresetPath%, Collect, %v%
+				}
+				if (PresetArray["BoostTimers"]=0) {
+					For k, v in BoostTimer
+						IniDelete, %PresetPath%, Boost, %v%
+					For k, v in BoosterTimer
+						IniDelete, %PresetPath%, Collect, %v%
 				}
 			case 2: ; delete preset file
 				FileDelete, %PresetPath%
@@ -4303,6 +4365,28 @@ nm_ImportPreset() {
 			}
 		}
 	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
+}
+nm_timerhide(type) {
+	if (type=1) {
+		GuiControlGet, PresetCollect
+		GuiControl, % (PresetCollect ? "Enable" : "Disable"), PresetCollectTimers
+		GuiControl, % (PresetCollect ? "Show" : "Hide"), PresetCollectTimers
+	}
+	else if (type=2) {
+		GuiControlGet, PresetKill
+		GuiControl, % (PresetKill ? "Enable" : "Disable"), PresetKillTimers
+		GuiControl, % (PresetKill ? "Show" : "Hide"), PresetKillTimers
+	}
+	else if (type=3) {
+		GuiControlGet, PresetBoost
+		GuiControl, % (PresetBoost ? "Enable" : "Disable"), PresetBoostTimers
+		GuiControl, % (PresetBoost ? "Show" : "Hide"), PresetBoostTimers
+	}
+	else if (type=4) {
+		GuiControlGet, PresetPlanters
+		GuiControl, % (PresetPlanters ? "Enable" : "Disable"), PresetPlanterTimers
+		GuiControl, % (PresetPlanters ? "Show" : "Hide"), PresetPlanterTimers
+	}
 }
 nm_showAdvancedSettings(){
 	global BuffDetectReset
@@ -22159,20 +22243,20 @@ nm_PresetPopup(type:=0) {
 	}
 
 	Gui, PresetCreation:Add, CheckBox, x20 y46 w120 h23 +Checked vPresetGather, Gather
-	Gui, PresetCreation:Add, CheckBox, x20 y94 w59 h23 +Checked vPresetKill, Kill
+	Gui, PresetCreation:Add, CheckBox, x20 y94 w59 h23 +Checked gkillhide vPresetKill, Kill
 	Gui, PresetCreation:Add, CheckBox, x20 y142 w120 h23 +Checked vPresetQuest, Quest
-	Gui, PresetCreation:Add, CheckBox, x20 y70 w59 h23 +Checked vPresetCollect, Collect
-	Gui, PresetCreation:Add, CheckBox, x20 y118 w59 h23 +Checked vPresetBoost, Boost
-	Gui, PresetCreation:Add, CheckBox, x20 y166 w59 h23 +Checked vPresetPlanters, Planters
+	Gui, PresetCreation:Add, CheckBox, x20 y70 w59 h23 +Checked gcollecthide vPresetCollect, Collect
+	Gui, PresetCreation:Add, CheckBox, x20 y118 w59 h23 +Checked gboosthide vPresetBoost, Boost
+	Gui, PresetCreation:Add, CheckBox, x20 y166 w59 h23 +Checked gplanterhide vPresetPlanters, Planters
 	Gui, PresetCreation:Add, CheckBox, x20 y190 w120 h23 vPresetDiscord gConfirmDiscord, Discord
     Gui, PresetCreation:Add, CheckBox, x20 y214 w120 h23 vPresetPrivateServer, Private Server Link
 	Gui, PresetCreation:Add, CheckBox, x20 y238 w120 h23 +Checked vPresetSettings, Settings
 	Gui, PresetCreation:Add, CheckBox, x20 y262 w120 h23 +Checked vPresetMisc, Misc
     Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 gPresetAll vPresetAll, All
-    Gui, PresetCreation:Add, CheckBox, x81 y70 w59 h23, Timers
-    Gui, PresetCreation:Add, CheckBox, x81 y94 w59 h23, Timers
-    Gui, PresetCreation:Add, CheckBox, x81 y118 w59 h23, Timers
-    Gui, PresetCreation:Add, CheckBox, x81 y166 w59 h23, Timers
+    Gui, PresetCreation:Add, CheckBox, x81 y70 w59 h23 vPresetCollectTimers, Timers
+    Gui, PresetCreation:Add, CheckBox, x81 y94 w59 h23 vPresetKillTimers, Timers
+    Gui, PresetCreation:Add, CheckBox, x81 y118 w59 h23 vPresetBoostTimers, Timers
+    Gui, PresetCreation:Add, CheckBox, x81 y166 w59 h23 vPresetPlanterTimers, Timers
 }
 
 ConfirmDiscord:
@@ -22182,6 +22266,22 @@ if (PresetDiscord=1) {
     IfMsgBox, No
         GuiControl,, PresetDiscord, 0
 }
+return
+
+collecthide:
+nm_timerhide(1)
+return
+
+killhide:
+nm_timerhide(2)
+return
+
+boosthide:
+nm_timerhide(3)
+return
+
+planterhide:
+nm_timerhide(4)
 return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
