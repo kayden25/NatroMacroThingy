@@ -22219,6 +22219,10 @@ GuiControl,, PresetDiscord, % (PresetAll ? 1 : 0)
 GuiControl,, PresetPrivateServer, % (PresetAll ? 1 : 0)
 GuiControl,, PresetSettings, 1
 GuiControl,, PresetMisc, 1
+GuiControl,, PresetCollectTimers, 1
+GuiControl,, PresetBoostTimers, 1
+GuiControl,, PresetPlanterTimers, 1
+GuiControl,, PresetKillTimers, 1
 return
 
 CreatePresetGui:
