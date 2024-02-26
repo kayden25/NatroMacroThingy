@@ -4318,6 +4318,10 @@ nm_LoadPreset() {
 				IniWrite, %ini%, %A_WorkingDir%\settings\manual_planters.ini, %v% ; load manual planter settings
 			case "Bamboo", "Blue Flower", "Cactus", "Clover", "Coconut", "Dandelion", "Mountain Top", "Mushroom", "Pepper", "Pine Tree", "Pineapple", "Pumpkin", "Rose", "Spider", "Strawberry", "Stump", "Sunflower":
 				IniWrite, %ini%, %A_WorkingDir%\settings\field_config.ini, %v% ; load field defaults
+			case "Status", "Settings", "Collect":
+				SectionKeys := nm_GetKeys(PresetPath, v)
+				For x, y in SectionKeys
+					IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%, %y%
 			default:
 				IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
 		}
@@ -4411,6 +4415,30 @@ nm_ImportPreset() {
 			}
 		}
 	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
+}
+nm_GetKeys(FilePath, Section) {
+	SectionKeys := []
+	FoundSection := 0
+	Loop, read, %FilePath%
+	{
+		if (A_LoopReadLine="[" Section "]") {
+			FoundSection := 1
+			continue
+		}
+		else if (A_LoopReadLine="") {
+			continue
+		}
+		if (FoundSection) {	
+			if (SubStr(A_LoopReadLine, 1, 1)="[") {
+				break
+			}
+			if (InStr(A_LoopReadLine, "=")) {
+				key := StrSplit(A_LoopReadLine, "=", 1)
+				SectionKeys.push(key[1])
+			}
+		}
+	}
+	return SectionKeys
 }
 nm_timerhide(type) {
 	static TimerArr := ["PresetCollect", "PresetKill", "PresetBoost", "PresetPlanters"]
