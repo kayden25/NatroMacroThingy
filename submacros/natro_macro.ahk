@@ -4353,6 +4353,9 @@ nm_ImportPreset() {
 	WinGetPos, gx, gy, gw, gh, Preset Settings
 	InputBox, PresetInput, Import, Enter name:,, 120, 120, % gx+95, % gy-22
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetInput . ".ini"
+	PresetPatternPath := A_WorkingDir . "\patterns"
+	PresetPatterns := ["FieldPattern1", "FieldPattern2", "FieldPattern3"]
+	PresetDefaultPatterns := ["Bamboo", "Blue Flower", "Cactus", "Clover", "Coconut", "Dandelion", "Mountain Top", "Mushroom", "Pepper", "Pine Tree", "Pineapple", "Pumpkin", "Rose", "Spider", "Strawberry", "Stump", "Sunflower"]
 	loop 2 {
 		ErrorCheck := (A_Index=1 && PresetInput="") ? 1
 			: (A_Index=2 && PresetInput="No Presets") ? 1 : 0
@@ -4370,15 +4373,30 @@ nm_ImportPreset() {
 		nm_CreatePresetFiles(PresetInput, 2)
 	}
 	FormatCheck := A_WorkingDir . "\settings\presets\formatcheck.ini"
-	FileAppend, %ClipboardAll%, %FormatCheck%
+	FileAppend, %Clipboard%, %FormatCheck%
 	IniRead, SectionNames, %FormatCheck%
 	SectionArray := StrSplit(SectionNames, "`n") ; save section names to array
 	for k, v in SectionArray {
-		IniRead, ini, %FormatCheck%, %k%
-		IniWrite, %ini%, %PresetPath%, %k%
+		IniRead, ini, %FormatCheck%, %v%
+		IniWrite, %ini%, %PresetPath%, %v%
 	}
 	FileDelete, %FormatCheck%
 	if (FileExist(PresetPath)) {
+		IniRead, ini, %PresetPath%,  Gather
+		if (ini!="") {
+			for k, v in PresetPatterns {
+				IniRead, ini, %PresetPath%,  Gather, %v%
+				if (!FileExist(PresetPatternPath "\" ini ".ahk") && ini!="Stationary") {
+					MsgBox,,, % "Pattern " ini " for " v " does not exist.", 3
+				}
+			}
+			for k, v in PresetDefaultPatterns {
+				IniRead, ini, %PresetPath%, %v%, pattern
+				if (!FileExist(PresetPatternPath "\" ini ".ahk") && ini!="Stationary") {
+					MsgBox,,, % "Default field pattern " ini " for " v " does not exist.", 3
+				}
+			}
+		}
 		MsgBox,,, % "Preset " PresetInput " has been created.", 3
 	}
 	else {
