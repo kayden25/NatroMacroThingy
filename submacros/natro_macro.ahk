@@ -4347,6 +4347,7 @@ nm_CopyPreset() {
 		}
 	}
 	FileRead, Clipboard, %PresetPath%
+	MsgBox,,, % "Preset " PresetName " has been copied to clipboard.", 3
 }
 nm_ImportPreset() {
 	WinGetPos, gx, gy, gw, gh, Preset Settings
