@@ -4038,7 +4038,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 	GuiControlGet, PresetCollectTimers
 	GuiControlGet, PresetKillTimers
 	GuiControlGet, PresetBoostTimers
-	GuiControlGet, PresetPlanterTimers
+	GuiControlGet, PresetPlantersTimers
 	if (!FileExist(A_WorkingDir "\settings\presets")) {
 		FileCreateDir, %A_WorkingDir%\settings\presets
 	}
@@ -4068,7 +4068,7 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 		PresetArray["CollectTimers"] := PresetCollectTimers
 		PresetArray["KillTimers"] := PresetKillTimers
 		PresetArray["BoostTimers"] := PresetBoostTimers
-		PresetArray["Planters"] := PresetPlanterTimers
+		PresetArray["Planters"] := PresetPlantersTimers
 		IniRead, planterSectionNames, %A_WorkingDir%\settings\manual_planters.ini
 		PlanterSections := StrSplit(planterSectionNames, "`n") ; get manual panters ini
 		IniRead, fieldSectionNames, %A_WorkingDir%\settings\field_config.ini
@@ -4077,92 +4077,107 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 			case 1: ; create the preset file
 				for k, v in PresetArray {
 					if (v!=0) {
-						if (k="Gui") { ; save manual planter settings to preset
-							for x, y in PlanterSections { 
-								IniRead, ini, %A_WorkingDir%\settings\manual_planters.ini, %y%
-								IniWrite, %ini%, %PresetPath%, %y%
-							}
-						}
-						else if (k="Gather") { ; save field defaults
-							for x, y in FieldSections { 
-								IniRead, ini, %A_WorkingDir%\settings\field_config.ini, %y%
-								IniWrite, %ini%, %PresetPath%, %y%
-							}
-						}
-						else if (k="Misc" || k="Kill" || k="Private Server" || k="CollectTimers" || k="KillTimers" || k="BoostTimers") {
-							if (k="Misc" && PresetArray["Settings"]=0) {
-								For x, y in MiscArray {
-									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
-									IniWrite, %PresetPath%, Settings, %y%
+						switch k {
+							case "Gui":
+								for x, y in PlanterSections { ; save manual planter settings to preset
+									IniRead, ini, %A_WorkingDir%\settings\manual_planters.ini, %y%
+									IniWrite, %ini%, %PresetPath%, %y%
 								}
-								For x, y in MiscDiscord {
-									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Status, %y%
-									IniWrite, %PresetPath%, Status, %y%
+							case "Gather":
+								for x, y in FieldSections { ; save field defaults
+									IniRead, ini, %A_WorkingDir%\settings\field_config.ini, %y%
+									IniWrite, %ini%, %PresetPath%, %y%
 								}
-							}
-							else if (k="Kill" && PresetArray["Collect"]=0) {
-								For x, y in KillArray {
-									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
-									IniWrite, %PresetPath%, Collect, %y%
+							case "Misc", "Kill", "Private Server", "CollectTimers", "KillTimers", "BoostTimers":
+								if (k="Misc") {
+									if (PresetArray["Settings"]=0) {
+										For x, y in MiscArray {
+											IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
+											IniWrite, %PresetPath%, Settings, %y%
+										}
+									}
+									if (PresetArray["Status"]=0) {
+										For x, y in MiscDiscord {
+											IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Status, %y%
+											IniWrite, %PresetPath%, Status, %y%
+										}
+									}
 								}
-								if (PresetArray["KillTimers"]=1) {
-									For x, y in KillTimer {
+								else if (k="Kill" && PresetArray["Collect"]=0) {
+									For x, y in KillArray {
 										IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
 										IniWrite, %PresetPath%, Collect, %y%
 									}
+									if (PresetArray["KillTimers"]=1) {
+										For x, y in KillTimer {
+											IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
+											IniWrite, %PresetPath%, Collect, %y%
+										}
+									}
 								}
-							}
-							else if (k="Private Server") {
-								For x, y in ServerArray {
-									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
-									IniWrite, %PresetPath%, Settings, %y%
+								else if (k="Private Server" && PresetArray["Settings"]=0) {
+									For x, y in ServerArray {
+										IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
+										IniWrite, %PresetPath%, Settings, %y%
+									}
 								}
-							}
-							else if (k="BoostTimers") {
-								For x, y in BoostTimers {
-									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
-									IniWrite, %PresetPath%, Boost, %y%
+								else if (k="BoostTimers" && PresetArray["Boost"]=1) {
+									if (PresetArray["Settings"]=0) {
+										For x, y in BoostTimers {
+											IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
+											IniWrite, %PresetPath%, Settings, %y%
+										}
+									}
+									if (PresetArray["Collect"]=0) {
+										For x, y in BoosterTimers {
+											IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
+											IniWrite, %PresetPath%, Collect, %y%
+										}
+									}
 								}
-								For x, y in BoosterTimers {
-									IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
-									IniWrite, %PresetPath%, Collect, %y%
-								}
-							}
-							continue
+								continue
 						}
 						IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, %k%
 						IniWrite, %ini%, %PresetPath%, %k%
 					}
 				}
-				if (PresetArray["Misc"]=0 && PresetArray["Settings"]=1) {
-					For k, v in MiscArray
+				if (PresetArray["Collect"]=1) {
+					if (PresetArray["Kill"]=0) {
+						For k, v in KillArray
+							IniDelete, %PresetPath%, Collect, %v%
+						For k, v in KillTimer
+							IniDelete, %PresetPath%, Collect, %v%
+					}
+					else if (PresetArray["KillTimers"]=0) {
+						For k, v in KillTimer
+							IniDelete, %PresetPath%, Collect, %v%
+					}
+					if (PresetArray["CollectTimers"]=0) {
+						For k, v in CollectTimer
+							IniDelete, %PresetPath%, Collect, %v%
+					}
+					if (PresetArray["BoostTimers"]=0) {
+						For k, v in BoosterTimer
+							IniDelete, %PresetPath%, Collect, %v%
+					}
+				}
+				if (PresetArray["Settings"]=1) {
+					if (PresetArray["Misc"]=0) {
+						For k, v in MiscArray
 						IniDelete, %PresetPath%, Settings, %v%
+					}
+					if (PresetArray["Private Server"]=0) {
+						For k, v in ServerArray
+							IniDelete, %PresetPath%, Settings, %v%
+					}
+				}
+				if (PresetArray["Misc"]=0 && PresetArray["Status"]=1) {
 					For k, v in MiscDiscord
 						IniDelete, %PresetPath%, Status, %v%
 				}
-				if (PresetArray["Kill"]=0 && PresetArray["Collect"]=1) {
-					For k, v in KillArray
-						IniDelete, %PresetPath%, Collect, %v%
-					For k, v in KillTimer
-						IniDelete, %PresetPath%, Collect, %v%
-				}
-				else if (PresetArray["KillTimers"]=0 && PresetArray["Collect"]=1) {
-					For k, v in KillTimer
-						IniDelete, %PresetPath%, Collect, %v%
-				}
-				if (PresetArray["Private Server"]=0) && PresetArray["Settings"]=1 {
-					For k, v in ServerArray
-						IniDelete, %PresetPath%, Settings, %v%
-				}
-				if (PresetArray["CollectTimers"]=0 && PresetArray["Collect"]=1) {
-					For k, v in CollectTimer
-						IniDelete, %PresetPath%, Collect, %v%
-				}
-				if (PresetArray["BoostTimers"]=0) {
+				if (PresetArray["BoostTimers"]=0 && PresetArray["Boost"]=1) {
 					For k, v in BoostTimer
 						IniDelete, %PresetPath%, Boost, %v%
-					For k, v in BoosterTimer
-						IniDelete, %PresetPath%, Collect, %v%
 				}
 			case 2: ; delete preset file
 				FileDelete, %PresetPath%
@@ -4298,14 +4313,13 @@ nm_LoadPreset() {
 	SectionArray := StrSplit(SectionNames, "`n") ; save section names to array
 	for k, v in SectionArray { ; load preset
 		IniRead, ini, %PresetPath%, %v%
-		if (v="General" || v="Slot 1" || v="Slot 2" || v="Slot 3") {
-			IniWrite, %ini%, %A_WorkingDir%\settings\manual_planters.ini, %v% ; load manual planter settings
-		}
-		else if (v="Bamboo" || v="Blue Flower" || v="Cactus" || v="Clover" || v="Coconut" || v="Dandelion" || v="Mountain Top" || v="Mushroom" || v="Pepper" || v="Pine Tree" || v="Pineapple" || v="Pumpkin" || v="Rose" || v="Spider" || v="Strawberry" || v="Stump" || v="Sunflower") {
-			IniWrite, %ini%, %A_WorkingDir%\settings\field_config.ini, %v% ; load field defaults
-		}
-		else {
-			IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
+		switch v {
+			case "General", "Slot 1", "Slot 2", "Slot 3":
+				IniWrite, %ini%, %A_WorkingDir%\settings\manual_planters.ini, %v% ; load manual planter settings
+			case "Bamboo", "Blue Flower", "Cactus", "Clover", "Coconut", "Dandelion", "Mountain Top", "Mushroom", "Pepper", "Pine Tree", "Pineapple", "Pumpkin", "Rose", "Spider", "Strawberry", "Stump", "Sunflower":
+				IniWrite, %ini%, %A_WorkingDir%\settings\field_config.ini, %v% ; load field defaults
+			default:
+				IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
 		}
 	}
 	WinClose, StatMonitor.ahk ahk_class AutoHotkey
@@ -4374,26 +4388,10 @@ nm_ImportPreset() {
 	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_timerhide(type) {
-	if (type=1) {
-		GuiControlGet, PresetCollect
-		GuiControl, % (PresetCollect ? "Enable" : "Disable"), PresetCollectTimers
-		GuiControl, % (PresetCollect ? "Show" : "Hide"), PresetCollectTimers
-	}
-	else if (type=2) {
-		GuiControlGet, PresetKill
-		GuiControl, % (PresetKill ? "Enable" : "Disable"), PresetKillTimers
-		GuiControl, % (PresetKill ? "Show" : "Hide"), PresetKillTimers
-	}
-	else if (type=3) {
-		GuiControlGet, PresetBoost
-		GuiControl, % (PresetBoost ? "Enable" : "Disable"), PresetBoostTimers
-		GuiControl, % (PresetBoost ? "Show" : "Hide"), PresetBoostTimers
-	}
-	else if (type=4) {
-		GuiControlGet, PresetPlanters
-		GuiControl, % (PresetPlanters ? "Enable" : "Disable"), PresetPlanterTimers
-		GuiControl, % (PresetPlanters ? "Show" : "Hide"), PresetPlanterTimers
-	}
+	static TimerArr := ["PresetCollect", "PresetKill", "PresetBoost", "PresetPlanters"]
+	GuiControlGet, CtrlValue,, % CtrlN:=TimerArr[type]
+	GuiControl, % (CtrlValue ? "Enable" : "Disable"), % CtrlN "Timers"
+	GuiControl, % (CtrlValue ? "Show" : "Hide"), % CtrlN "Timers"
 }
 nm_showAdvancedSettings(){
 	global BuffDetectReset
@@ -9460,7 +9458,7 @@ nm_CreatePresetLock(){
 	GuiControl, PresetCreation:disable, PresetPrivateServer
 	GuiControl, PresetCreation:disable, PresetCollectTimers
 	GuiControl, PresetCreation:disable, PresetBoostTimers
-	GuiControl, PresetCreation:disable, PresetPlanterTimers
+	GuiControl, PresetCreation:disable, PresetPlantersTimers
 	GuiControl, PresetCreation:disable, PresetKillTimers
 }
 nm_CreatePresetUnLock(){
@@ -9479,7 +9477,7 @@ nm_CreatePresetUnLock(){
 	GuiControl, PresetCreation:enable, PresetPrivateServer
 	GuiControl, PresetCreation:enable, PresetCollectTimers
 	GuiControl, PresetCreation:enable, PresetBoostTimers
-	GuiControl, PresetCreation:enable, PresetPlanterTimers
+	GuiControl, PresetCreation:enable, PresetPlantersTimers
 	GuiControl, PresetCreation:enable, PresetKillTimers
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -22203,11 +22201,11 @@ GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetMisc
 GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPrivateServer
 GuiControl, Show, PresetCollectTimers
 GuiControl, Show, PresetBoostTimers
-GuiControl, Show, PresetPlanterTimers
+GuiControl, Show, PresetPlantersTimers
 GuiControl, Show, PresetKillTimers
 GuiControl, Enable, PresetCollectTimers
 GuiControl, Enable, PresetBoostTimers
-GuiControl, Enable, PresetPlanterTimers
+GuiControl, Enable, PresetPlantersTimers
 GuiControl, Enable, PresetKillTimers
 GuiControl,, PresetGather, 1
 GuiControl,, PresetKill, 1
@@ -22219,10 +22217,10 @@ GuiControl,, PresetDiscord, % (PresetAll ? 1 : 0)
 GuiControl,, PresetPrivateServer, % (PresetAll ? 1 : 0)
 GuiControl,, PresetSettings, 1
 GuiControl,, PresetMisc, 1
-GuiControl,, PresetCollectTimers, 1
-GuiControl,, PresetBoostTimers, 1
-GuiControl,, PresetPlanterTimers, 1
-GuiControl,, PresetKillTimers, 1
+GuiControl,, PresetCollectTimers, % (PresetAll ? 1 : 0)
+GuiControl,, PresetBoostTimers, % (PresetAll ? 1 : 0)
+GuiControl,, PresetPlantersTimers, % (PresetAll ? 1 : 0)
+GuiControl,, PresetKillTimers, % (PresetAll ? 1 : 0)
 return
 
 CreatePresetGui:
@@ -22283,7 +22281,7 @@ nm_PresetPopup(type:=0) {
     Gui, PresetCreation:Add, CheckBox, x81 y70 w59 h23 vPresetCollectTimers, Timers
     Gui, PresetCreation:Add, CheckBox, x81 y94 w59 h23 vPresetKillTimers, Timers
     Gui, PresetCreation:Add, CheckBox, x81 y118 w59 h23 vPresetBoostTimers, Timers
-    Gui, PresetCreation:Add, CheckBox, x81 y166 w59 h23 vPresetPlanterTimers, Timers
+    Gui, PresetCreation:Add, CheckBox, x81 y166 w59 h23 vPresetPlantersTimers, Timers
 }
 
 ConfirmDiscord:
