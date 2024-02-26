@@ -4093,45 +4093,45 @@ nm_CreatePresetFiles(PresetName, type:=0) {
 									if (PresetArray["Settings"]=0) {
 										For x, y in MiscArray {
 											IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
-											IniWrite, %PresetPath%, Settings, %y%
+											IniWrite, %ini%, %PresetPath%, Settings, %y%
 										}
 									}
 									if (PresetArray["Status"]=0) {
 										For x, y in MiscDiscord {
 											IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Status, %y%
-											IniWrite, %PresetPath%, Status, %y%
+											IniWrite, %ini%, %PresetPath%, Status, %y%
 										}
 									}
 								}
 								else if (k="Kill" && PresetArray["Collect"]=0) {
 									For x, y in KillArray {
 										IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
-										IniWrite, %PresetPath%, Collect, %y%
+										IniWrite, %ini%, %PresetPath%, Collect, %y%
 									}
 									if (PresetArray["KillTimers"]=1) {
 										For x, y in KillTimer {
 											IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
-											IniWrite, %PresetPath%, Collect, %y%
+											IniWrite, %ini%, %PresetPath%, Collect, %y%
 										}
 									}
 								}
 								else if (k="Private Server" && PresetArray["Settings"]=0) {
 									For x, y in ServerArray {
 										IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
-										IniWrite, %PresetPath%, Settings, %y%
+										IniWrite, %ini%, %PresetPath%, Settings, %y%
 									}
 								}
 								else if (k="BoostTimers" && PresetArray["Boost"]=1) {
 									if (PresetArray["Settings"]=0) {
 										For x, y in BoostTimers {
 											IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Settings, %y%
-											IniWrite, %PresetPath%, Settings, %y%
+											IniWrite, %ini%, %PresetPath%, Settings, %y%
 										}
 									}
 									if (PresetArray["Collect"]=0) {
 										For x, y in BoosterTimers {
 											IniRead, ini, %A_WorkingDir%\settings\nm_config.ini, Collect, %y%
-											IniWrite, %PresetPath%, Collect, %y%
+											IniWrite, %ini%, %PresetPath%, Collect, %y%
 										}
 									}
 								}
@@ -4377,6 +4377,12 @@ nm_ImportPreset() {
 		IniWrite, %ini%, %PresetPath%, %k%
 	}
 	FileDelete, %FormatCheck%
+	if (FileExist(PresetPath)) {
+		MsgBox,,, % "Preset " PresetInput " has been created.", 3
+	}
+	else {
+		MsgBox,,, % "Preset " PresetInput " could not be created. No valid data was imported.", 5
+	}
 	presetlist := "|" ; setting new presets to selection
 	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		{
