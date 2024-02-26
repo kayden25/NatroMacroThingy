@@ -4293,6 +4293,7 @@ nm_LoadPreset() {
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
+	IniKeys := []
 	loop 3 {
 		ErrorCheck := (A_Index=1 && PresetName="") ? 1
 			: (A_Index=2 && PresetName="No Presets") ? 1
@@ -4311,6 +4312,8 @@ nm_LoadPreset() {
 		return
 	IniRead, SectionNames, %PresetPath%
 	SectionArray := StrSplit(SectionNames, "`n") ; save section names to array
+	Gui, PresetMain:Destroy
+	nm_LockTabs()
 	for k, v in SectionArray { ; load preset
 		IniRead, ini, %PresetPath%, %v%
 		switch v {
@@ -4321,13 +4324,13 @@ nm_LoadPreset() {
 			default:
 				IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
 		}
+		SectionKeys := nm_GetKeys(PresetPath, v)
+		for x, y in SectionKeys {
+			IniRead, ini, %PresetPath%, %v%, %y%
+			GuiControl, Choose, %y%, %ini%
+		}
 	}
-	WinClose, StatMonitor.ahk ahk_class AutoHotkey
-	WinClose, background.ahk ahk_class AutoHotkey
-	WinClose, Status.ahk ahk_class AutoHotkey
-	nm_SaveGui()
-	reload
-	Sleep, 10000
+	nm_LockTabs(0)
 }
 nm_CopyPreset() {
 	GuiControlGet, PresetSelect
@@ -4411,6 +4414,30 @@ nm_ImportPreset() {
 			}
 		}
 	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
+}
+nm_GetKeys(FilePath, Section) {
+	SectionKeys := []
+	FoundSection := 0
+	Loop, read, %FilePath%
+	{
+		if (A_LoopReadLine="[" Section "]") {
+			FoundSection := 1
+			continue
+		}
+		else if (A_LoopReadLine="") {
+			continue
+		}
+		if (FoundSection) {	
+			if (SubStr(A_LoopReadLine, 1, 1)="[") {
+				break
+			}
+			if (InStr(A_LoopReadLine, "=")) {
+				key := StrSplit(A_LoopReadLine, "=", 1)
+				SectionKeys.push(key[1])
+			}
+		}
+	}
+	return SectionKeys
 }
 nm_timerhide(type) {
 	static TimerArr := ["PresetCollect", "PresetKill", "PresetBoost", "PresetPlanters"]
