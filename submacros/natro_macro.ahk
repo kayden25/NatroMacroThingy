@@ -4314,6 +4314,7 @@ nm_LoadPreset() {
 	SectionArray := StrSplit(SectionNames, "`n") ; save section names to array
 	Gui, PresetMain:Destroy
 	nm_LockTabs()
+	gui, PresetMain:Destroy
 	for k, v in SectionArray { ; load preset
 		IniRead, ini, %PresetPath%, %v%
 		switch v {
@@ -4326,8 +4327,8 @@ nm_LoadPreset() {
 		}
 		SectionKeys := nm_GetKeys(PresetPath, v)
 		for x, y in SectionKeys {
-			IniRead, ini, %PresetPath%, %v%, %y%
-			GuiControl, Choose, %y%, %ini%
+			IniRead, %y%, %A_WorkingDir%\settings\nm_config.ini, %v%, %y%
+			nm_UpdateGUIVar(y)
 		}
 	}
 	nm_LockTabs(0)
