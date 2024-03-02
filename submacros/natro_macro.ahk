@@ -4323,6 +4323,10 @@ nm_LoadPreset() {
 			case "Bamboo", "Blue Flower", "Cactus", "Clover", "Coconut", "Dandelion", "Mountain Top", "Mushroom", "Pepper", "Pine Tree", "Pineapple", "Pumpkin", "Rose", "Spider", "Strawberry", "Stump", "Sunflower":
 				IniWrite, %ini%, %A_WorkingDir%\settings\field_config.ini, %v% ; load field defaults
 				continue
+			case "Status", "Settings", "Collect":
+				SectionKeys := nm_GetKeys(PresetPath, v)
+				For x, y in SectionKeys
+					IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%, %y%
 			default:
 				IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
 		}
