@@ -4218,10 +4218,9 @@ nm_CreatePreset() {
 				presetlist .= FileName . "|"
 			}
 		}
-	gui, PresetMain:Default
 	nm_PresetUnLock()
 	Gui, PresetCreation:destroy
-	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
+	GuiControl, PresetMain:, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_OverwritePreset() {
 	GuiControlGet, SetPresetName
@@ -4290,10 +4289,10 @@ nm_DeletePreset() {
 		GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
 }
 nm_LoadPreset() {
+	global hGUI
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
-	IniKeys := []
 	loop 3 {
 		ErrorCheck := (A_Index=1 && PresetName="") ? 1
 			: (A_Index=2 && PresetName="No Presets") ? 1
@@ -4313,14 +4312,17 @@ nm_LoadPreset() {
 	IniRead, SectionNames, %PresetPath%
 	SectionArray := StrSplit(SectionNames, "`n") ; save section names to array
 	Gui, PresetMain:Destroy
+	Gui, %hGUI%:Default
 	nm_LockTabs()
 	for k, v in SectionArray { ; load preset
 		IniRead, ini, %PresetPath%, %v%
 		switch v {
 			case "General", "Slot 1", "Slot 2", "Slot 3":
 				IniWrite, %ini%, %A_WorkingDir%\settings\manual_planters.ini, %v% ; load manual planter settings
+				continue
 			case "Bamboo", "Blue Flower", "Cactus", "Clover", "Coconut", "Dandelion", "Mountain Top", "Mushroom", "Pepper", "Pine Tree", "Pineapple", "Pumpkin", "Rose", "Spider", "Strawberry", "Stump", "Sunflower":
 				IniWrite, %ini%, %A_WorkingDir%\settings\field_config.ini, %v% ; load field defaults
+				continue
 			default:
 				IniWrite, %ini%, %A_WorkingDir%\settings\nm_config.ini, %v%
 		}
@@ -22211,15 +22213,15 @@ return
 
 showPresetGUI:
 presetlist := "|" ; setting new presets to selection
-	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
-		{
-			if (A_LoopFileName!="") {
-				SplitPath, A_LoopFileName,,,, FileName
-				presetlist .= FileName . "|"
-			}
-		}
+Loop, Files, %A_WorkingDir%\settings\presets\*.ini
+{
+	if (A_LoopFileName!="") {
+		SplitPath, A_LoopFileName,,,, FileName
+		presetlist .= FileName . "|"
+	}
+}
 WinGetPos, gx, gy, gw, gh, Natro Macro
-Gui, PresetMain:New
+Gui, PresetMain:New, +AlwaysOnTop +Owner%hGUI% -MinimizeBox
 Gui, PresetMain:Show, % "x" gx+85 " y" gy+35 " w300 h200", Preset Settings
 
 Gui, PresetMain:Font, s9, Segoe UI
