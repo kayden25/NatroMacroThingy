@@ -4189,16 +4189,9 @@ nm_CreatePreset() {
 	PresetName := SetPresetName
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
-	loop 2 {
-		ErrorCheck := (A_Index=1 && PresetName="") ? 1
-			: (A_Index=2 && PresetName="No Presets") ? 1 : 0
-		ErrorMsg := (A_Index=1) ? "No preset name given."
-			: (A_Index=2) ? "You can't create no preset. Use a different name."
-			: "Unknown Error"
-		if (ErrorCheck) {
-			MsgBox ,,, %ErrorMsg%, 5
-			return
-		}
+	if (PresetName="") {
+		MsgBox ,,, "No preset name given.", 5
+		return
 	}
 	if (FileExist(PresetPath)) {
 		MsgBox , 4,,Preset %PresetName% is already created. Do you want to overwrite %PresetName%?
@@ -4210,17 +4203,9 @@ nm_CreatePreset() {
 	nm_CreatePresetLock()
 	nm_CreatePresetFiles(PresetName, 1)
 
-	presetlist := "|" ; setting new presets to selection
-	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
-		{
-			if (A_LoopFileName!="") {
-				SplitPath, A_LoopFileName,,,, FileName
-				presetlist .= FileName . "|"
-			}
-		}
-	nm_PresetUnLock()
 	Gui, PresetCreation:destroy
-	GuiControl, PresetMain:, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
+	Gui, PresetMain:destroy
+	Gosub showPresetGUI
 }
 nm_OverwritePreset() {
 	GuiControlGet, SetPresetName
@@ -4244,67 +4229,42 @@ nm_OverwritePreset() {
 	else {
 		nm_CreatePresetFiles(PresetName, 1)
 	}
-	presetlist := "|" ; setting new presets to selection
-	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
-		{
-			if (A_LoopFileName!="") {
-				SplitPath, A_LoopFileName,,,, FileName
-				presetlist .= FileName . "|"
-			}
-		}
 	Gui, PresetCreation:destroy
-	nm_PresetUnLock()
-	GuiControl, PresetMain:, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
+	Gui, PresetMain:destroy
+	Gosub showPresetGUI
 }
 nm_DeletePreset() {
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
-	loop 3 {
-		ErrorCheck := (A_Index=1 && PresetName="") ? 1
-			: (A_Index=2 && PresetName="No Presets") ? 1
-			: (A_Index=3 && !FileExist(PresetPath)) ? 1 : 0
-		ErrorMsg := (A_Index=1) ? "No preset selected."
-			: (A_Index=2) ? "No presets created."
-			: (A_Index=3) ? "Preset " PresetName "does not exist."
-			: "Unknown Error"
-		if (ErrorCheck) {
-			MsgBox ,,, %ErrorMsg%, 5
-			return
-		}
+	if (PresetName="") {
+		MsgBox ,,, "No preset selected.", 5
+		return
+	}
+	if (!FileExist(PresetPath)) {
+		MsgBox ,,, "Preset " PresetName "does not exist.", 5
+		return
 	}
 	MsgBox , 4,, Do you want to delete %PresetName%?
 	IfMsgBox no
 		return
 	nm_CreatePresetFiles(PresetName, 2)
-	presetlist := "|" ; setting new presets to selection
-	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
-		{
-			if (A_LoopFileName!="") {
-				SplitPath, A_LoopFileName,,,, FileName
-				presetlist .= FileName . "|"
-			}
-		}
-		GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
+	Gui, PresetMain:destroy
+	Gosub showPresetGUI
 }
 nm_LoadPreset() {
 	global hGUI
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
-	loop 3 {
-		ErrorCheck := (A_Index=1 && PresetName="") ? 1
-			: (A_Index=2 && PresetName="No Presets") ? 1
-			: (A_Index=3 && !FileExist(PresetPath)) ? 1 : 0
-		ErrorMsg := (A_Index=1) ? "No preset selected."
-			: (A_Index=2) ? "No presets created."
-			: (A_Index=3) ? "Preset " PresetName "does not exist."
-			: "Unknown Error"
-		if (ErrorCheck) {
-			MsgBox ,,, %ErrorMsg%, 5
-			return
-		}
+	if (PresetName="") {
+		MsgBox ,,, "No preset selected.", 5
+		return
+	}
+	if (!FileExist(PresetPath)) {
+		MsgBox ,,, "Preset " PresetName "does not exist.", 5
+		return
 	}
 	MsgBox , 4,, Do you want to load %PresetName%? Current settings will be lost.
 	IfMsgBox no
@@ -4342,18 +4302,13 @@ nm_CopyPreset() {
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
-	loop 3 {
-		ErrorCheck := (A_Index=1 && PresetName="") ? 1
-			: (A_Index=2 && PresetName="No Presets") ? 1
-			: (A_Index=3 && !FileExist(PresetPath)) ? 1 : 0
-		ErrorMsg := (A_Index=1) ? "No preset selected."
-			: (A_Index=2) ? "No presets created."
-			: (A_Index=3) ? "Preset " PresetName "does not exist."
-			: "Unknown Error"
-		if (ErrorCheck) {
-			MsgBox ,,, %ErrorMsg%, 5
-			return
-		}
+	if (PresetName="") {
+		MsgBox ,,, "No preset selected.", 5
+		return
+	}
+	if (!FileExist(PresetPath)) {
+		MsgBox ,,, "Preset " PresetName "does not exist.", 5
+		return
 	}
 	FileRead, Clipboard, %PresetPath%
 	MsgBox,,, % "Preset " PresetName " has been copied to clipboard.", 3
@@ -4365,15 +4320,9 @@ nm_ImportPreset() {
 	PresetPatternPath := A_WorkingDir . "\patterns"
 	PresetPatterns := ["FieldPattern1", "FieldPattern2", "FieldPattern3"]
 	PresetDefaultPatterns := ["Bamboo", "Blue Flower", "Cactus", "Clover", "Coconut", "Dandelion", "Mountain Top", "Mushroom", "Pepper", "Pine Tree", "Pineapple", "Pumpkin", "Rose", "Spider", "Strawberry", "Stump", "Sunflower"]
-	loop 2 {
-		ErrorCheck := (A_Index=1 && PresetInput="") ? 1
-			: (A_Index=2 && PresetInput="No Presets") ? 1 : 0
-		ErrorMsg := (A_Index=1) ? "No preset name given."
-			: (A_Index=2) ? "You can't create no preset. Use a different name."
-			: "Unknown Error"
-		if (ErrorCheck) {
-			MsgBox,,, %ErrorMsg%, 5
-		}
+	if (PresetInput="") {
+		MsgBox ,,, "No preset name given.", 5
+		return
 	}
 	if (FileExist(PresetPath)) {
 		MsgBox, 4,, Do you want to overwrite %PresetInput%?
@@ -4411,15 +4360,8 @@ nm_ImportPreset() {
 	else {
 		MsgBox,,, % "Preset " PresetInput " could not be created. No valid data was imported.", 5
 	}
-	presetlist := "|" ; setting new presets to selection
-	Loop, Files, %A_WorkingDir%\settings\presets\*.ini
-		{
-			if (A_LoopFileName!="") {
-				SplitPath, A_LoopFileName,,,, FileName
-				presetlist .= FileName . "|"
-			}
-		}
-	GuiControl,, PresetSelect, % ((presetlist = "|") ? "|No Presets|" : presetlist)
+	Gui, PresetMain:destroy
+	Gosub showPresetGUI
 }
 nm_GetKeys(FilePath, Section) {
 	SectionKeys := []
@@ -22216,7 +22158,7 @@ nm_setStats()
 return
 
 showPresetGUI:
-presetlist := "|" ; setting new presets to selection
+presetlist := ""
 Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 {
 	if (A_LoopFileName!="") {
@@ -22224,20 +22166,28 @@ Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 		presetlist .= FileName . "|"
 	}
 }
+presetlist := RegExReplace(presetlist, "\|$")
 WinGetPos, gx, gy, gw, gh, Natro Macro
 Gui, PresetMain:New, +AlwaysOnTop +Owner%hGUI% -MinimizeBox
 Gui, PresetMain:Show, % "x" gx+85 " y" gy+35 " w300 h200", Preset Settings
 
 Gui, PresetMain:Font, s9, Segoe UI
-Gui, PresetMain:Add, Button, x13 y5 w90 h21 gCreatePresetGui vCreatePresetGui, Create New
+Gui, PresetMain:Add, Button, x13 y38 w90 h21 gCreatePresetGui vCreatePresetGui, Create New
 Gui, PresetMain:Add, Button, gnm_DeletePreset x197 y51 w90 h21 vDeletePreset, &Delete
 Gui, PresetMain:Add, Button, x197 y28 w90 h21 gOverwritePresetGui vOverwritePresetGui, Overwrite
 Gui, PresetMain:Add, Button, x90 y174 w120 h21 gnm_LoadPreset vLoadPreset, Load Preset
-Gui, PresetMain:Add, DropDownList, x197 y5 w90 choose1 vPresetSelect, % ((presetlist = "|") ? "No Presets|" : presetlist)
+Gui, PresetMain:Add, DropDownList, x197 y5 w90 choose1 vPresetSelect, %presetlist%
 Gui, PresetMain:Add, Button, x145 y92.5 w10 h15 gHelpSection, ?
 Gui, PresetMain:Add, Button, x110 y128 w80 h23 gnm_ImportPreset vImportPreset, Import
 Gui, PresetMain:Add, Button, x110 y151 w80 h23 gnm_CopyPreset vCopyPreset, Export
-
+if (presetlist = "") {
+    	GuiControl, Disable, PresetSelect
+	GuiControl, Disable, CopyPreset
+	GuiControl, Disable, DeletePreset
+	GuiControl, Disable, OverwritePresetGui
+	GuiControl, Disable, LoadPreset
+}
+Gui, PresetMain:Add, GroupBox, x8 y2 w100 h170, Creation
 return
 
 HelpSection:
