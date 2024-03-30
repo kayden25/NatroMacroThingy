@@ -4192,7 +4192,6 @@ nm_CreatePreset() {
 		nm_CreatePresetFiles(PresetName, 2)
 	}
 	nm_PresetLock()
-	nm_CreatePresetLock()
 	nm_CreatePresetFiles(PresetName, 1)
 
 	Gui, PresetMain:destroy
@@ -4212,7 +4211,6 @@ nm_OverwritePreset() {
 		return
 	nm_CreatePresetFiles(PresetName, 2)
 	nm_PresetLock()
-	nm_CreatePresetLock()
 	nm_CreatePresetFiles(PresetName, 1)
 	Gui, PresetMain:destroy
 	Gosub showPresetGUI
