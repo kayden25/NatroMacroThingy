@@ -1750,14 +1750,6 @@ global PopStarActive:=0
 global PreviousAction:="None"
 global CurrentAction:="Startup"
 fieldnamelist := "|Bamboo|Blue Flower|Cactus|Clover|Coconut|Dandelion|Mountain Top|Mushroom|Pepper|Pine Tree|Pineapple|Pumpkin|Rose|Spider|Strawberry|Stump|Sunflower|"
-global presetlist := "|"
-Loop, Files, %A_WorkingDir%\settings\presets\*.ini
-	{
-		if (A_LoopFileName!="") {
-			SplitPath, A_LoopFileName,,,, FileName
-				presetlist .= FileName . "|"
-		}
-	}
 hotbarwhilelist := "|Never|Always|At Hive|Gathering|Attacking|Microconverter|Whirligig|Enzymes|GatherStart|Snowflake|"
 sprinklerImages := ["saturator"]
 state:="Startup"
@@ -4203,33 +4195,25 @@ nm_CreatePreset() {
 	nm_CreatePresetLock()
 	nm_CreatePresetFiles(PresetName, 1)
 
-	Gui, PresetCreation:destroy
 	Gui, PresetMain:destroy
 	Gosub showPresetGUI
 }
 nm_OverwritePreset() {
-	GuiControlGet, SetPresetName
 	GuiControlGet, PresetSelect, PresetMain:
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
-	if (FileExist(A_WorkingDir "\settings\presets\" SetPresetName ".ini") && SetPresetName!=PresetName) {
-		MsgBox ,,, A preset with the name %SetPresetName% already exists. Please choose a different name., 5
+	if (!FileExist(PresetPath)) {
+		MsgBox ,,, Preset %PresetName% does not exist., 5
 		return
 	}
-	MsgBox , 4,,Do you want to overwrite %PresetName%?
+	MsgBox, 4,,Do you want to overwrite %PresetName%?
 	IfMsgBox no
 		return
 	nm_CreatePresetFiles(PresetName, 2)
 	nm_PresetLock()
 	nm_CreatePresetLock()
-	if (SetPresetName!="") {
-		nm_CreatePresetFiles(SetPresetName, 1)
-	} 
-	else {
-		nm_CreatePresetFiles(PresetName, 1)
-	}
-	Gui, PresetCreation:destroy
+	nm_CreatePresetFiles(PresetName, 1)
 	Gui, PresetMain:destroy
 	Gosub showPresetGUI
 }
@@ -4238,12 +4222,8 @@ nm_DeletePreset() {
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
 	nm_CreatePresetFiles(PresetName)
-	if (PresetName="") {
-		MsgBox ,,, "No preset selected.", 5
-		return
-	}
 	if (!FileExist(PresetPath)) {
-		MsgBox ,,, "Preset " PresetName "does not exist.", 5
+		MsgBox ,4096,, "Preset " PresetName "does not exist.", 5
 		return
 	}
 	MsgBox , 4,, Do you want to delete %PresetName%?
@@ -4258,12 +4238,8 @@ nm_LoadPreset() {
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
-	if (PresetName="") {
-		MsgBox ,,, "No preset selected.", 5
-		return
-	}
 	if (!FileExist(PresetPath)) {
-		MsgBox ,,, "Preset " PresetName "does not exist.", 5
+		MsgBox ,4096,, "Preset " PresetName "does not exist.", 5
 		return
 	}
 	MsgBox , 4,, Do you want to load %PresetName%? Current settings will be lost.
@@ -4302,17 +4278,14 @@ nm_CopyPreset() {
 	GuiControlGet, PresetSelect
 	PresetName := PresetSelect
 	PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
-	if (PresetName="") {
-		MsgBox ,,, "No preset selected.", 5
-		return
-	}
 	if (!FileExist(PresetPath)) {
-		MsgBox ,,, "Preset " PresetName "does not exist.", 5
+		MsgBox ,4096,, Preset %PresetName% does not exist., 5
 		return
 	}
 	FileRead, Clipboard, %PresetPath%
-	MsgBox,,, % "Preset " PresetName " has been copied to clipboard.", 3
+	MsgBox,4096,, Preset %PresetName% has been copied to clipboard., 3
 }
+
 nm_ImportPreset() {
 	WinGetPos, gx, gy, gw, gh, Preset Settings
 	InputBox, PresetInput, Import, Enter name:,, 120, 120, % gx+95, % gy-22
@@ -4321,7 +4294,7 @@ nm_ImportPreset() {
 	PresetPatterns := ["FieldPattern1", "FieldPattern2", "FieldPattern3"]
 	PresetDefaultPatterns := ["Bamboo", "Blue Flower", "Cactus", "Clover", "Coconut", "Dandelion", "Mountain Top", "Mushroom", "Pepper", "Pine Tree", "Pineapple", "Pumpkin", "Rose", "Spider", "Strawberry", "Stump", "Sunflower"]
 	if (PresetInput="") {
-		MsgBox ,,, "No preset name given.", 5
+		MsgBox ,4096,, "No preset name given.", 5
 		return
 	}
 	if (FileExist(PresetPath)) {
@@ -4355,10 +4328,10 @@ nm_ImportPreset() {
 				}
 			}
 		}
-		MsgBox,,, % "Preset " PresetInput " has been created.", 3
+		MsgBox,4096,, Preset %PresetInput% has been created., 3
 	}
 	else {
-		MsgBox,,, % "Preset " PresetInput " could not be created. No valid data was imported.", 5
+		MsgBox,4096,, Preset %PresetInput% could not be created. No valid data was imported., 5
 	}
 	Gui, PresetMain:destroy
 	Gosub showPresetGUI
@@ -4386,12 +4359,6 @@ nm_GetKeys(FilePath, Section) {
 		}
 	}
 	return SectionKeys
-}
-nm_timerhide(type) {
-	static TimerArr := ["PresetCollect", "PresetKill", "PresetBoost", "PresetPlanters"]
-	GuiControlGet, CtrlValue,, % CtrlN:=TimerArr[type]
-	GuiControl, % (CtrlValue ? "Enable" : "Disable"), % CtrlN "Timers"
-	GuiControl, % (CtrlValue ? "Show" : "Hide"), % CtrlN "Timers"
 }
 nm_showAdvancedSettings(){
 	global BuffDetectReset
@@ -9423,62 +9390,54 @@ nm_TabMiscUnLock(){
 	GuiControl, enable, MakeSuggestionButton
 }
 nm_PresetLock(){
-	GuiControl, PresetMain:disable, CreatePresetGui
+	GuiControl, PresetMain:disable, CreatePreset
 	GuiControl, PresetMain:disable, DeletePreset
-	GuiControl, PresetMain:disable, OverwritePresetGui
+	GuiControl, PresetMain:disable, OverwritePreset
 	GuiControl, PresetMain:disable, LoadPreset
 	GuiControl, PresetMain:disable, PresetSelect
 	GuiControl, PresetMain:disable, ImportPreset
 	GuiControl, PresetMain:disable, CopyPreset
-	
+	GuiControl, PresetMain:disable, SetPresetName
+	GuiControl, PresetMain:disable, PresetGather
+	GuiControl, PresetMain:disable, PresetKill
+	GuiControl, PresetMain:disable, PresetQuest
+	GuiControl, PresetMain:disable, PresetCollect
+	GuiControl, PresetMain:disable, PresetBoost
+	GuiControl, PresetMain:disable, PresetPlanters
+	GuiControl, PresetMain:disable, PresetDiscord
+	GuiControl, PresetMain:disable, PresetSettings
+	GuiControl, PresetMain:disable, PresetMisc
+	GuiControl, PresetMain:disable, PresetAll
+	GuiControl, PresetMain:disable, PresetPrivateServer
+	GuiControl, PresetMain:disable, PresetCollectTimers
+	GuiControl, PresetMain:disable, PresetBoostTimers
+	GuiControl, PresetMain:disable, PresetPlantersTimers
+	GuiControl, PresetMain:disable, PresetKillTimers
 }
 nm_PresetUnLock(){
-	GuiControl, PresetMain:enable, CreatePresetGui
+	GuiControl, PresetMain:enable, CreatePreset
 	GuiControl, PresetMain:enable, DeletePreset
-	GuiControl, PresetMain:enable, OverwritePresetGui
+	GuiControl, PresetMain:enable, OverwritePreset
 	GuiControl, PresetMain:enable, LoadPreset
 	GuiControl, PresetMain:enable, PresetSelect
 	GuiControl, PresetMain:enable, ImportPreset
 	GuiControl, PresetMain:enable, CopyPreset
-}
-nm_CreatePresetLock(){
-	GuiControl, PresetCreation:disable, Create
-	GuiControl, PresetCreation:disable, Overwrite
-	GuiControl, PresetCreation:disable, SetPresetName
-	GuiControl, PresetCreation:disable, PresetGather
-	GuiControl, PresetCreation:disable, PresetKill
-	GuiControl, PresetCreation:disable, PresetQuest
-	GuiControl, PresetCreation:disable, PresetCollect
-	GuiControl, PresetCreation:disable, PresetBoost
-	GuiControl, PresetCreation:disable, PresetPlanters
-	GuiControl, PresetCreation:disable, PresetDiscord
-	GuiControl, PresetCreation:disable, PresetSettings
-	GuiControl, PresetCreation:disable, PresetMisc
-	GuiControl, PresetCreation:disable, PresetAll
-	GuiControl, PresetCreation:disable, PresetPrivateServer
-	GuiControl, PresetCreation:disable, PresetCollectTimers
-	GuiControl, PresetCreation:disable, PresetBoostTimers
-	GuiControl, PresetCreation:disable, PresetPlantersTimers
-	GuiControl, PresetCreation:disable, PresetKillTimers
-}
-nm_CreatePresetUnLock(){
-	GuiControl, PresetCreation:enable, Create
-	GuiControl, PresetCreation:enable, Overwrite
-	GuiControl, PresetCreation:enable, PresetGather
-	GuiControl, PresetCreation:enable, PresetKill
-	GuiControl, PresetCreation:enable, PresetQuest
-	GuiControl, PresetCreation:enable, PresetCollect
-	GuiControl, PresetCreation:enable, PresetBoost
-	GuiControl, PresetCreation:enable, PresetPlanters
-	GuiControl, PresetCreation:enable, PresetDiscord
-	GuiControl, PresetCreation:enable, PresetSettings
-	GuiControl, PresetCreation:enable, PresetMisc
-	GuiControl, PresetCreation:enable, PresetAll
-	GuiControl, PresetCreation:enable, PresetPrivateServer
-	GuiControl, PresetCreation:enable, PresetCollectTimers
-	GuiControl, PresetCreation:enable, PresetBoostTimers
-	GuiControl, PresetCreation:enable, PresetPlantersTimers
-	GuiControl, PresetCreation:enable, PresetKillTimers
+	GuiControl, PresetMain:enable, SetPresetName
+	GuiControl, PresetMain:enable, PresetGather
+	GuiControl, PresetMain:enable, PresetKill
+	GuiControl, PresetMain:enable, PresetQuest
+	GuiControl, PresetMain:enable, PresetCollect
+	GuiControl, PresetMain:enable, PresetBoost
+	GuiControl, PresetMain:enable, PresetPlanters
+	GuiControl, PresetMain:enable, PresetDiscord
+	GuiControl, PresetMain:enable, PresetSettings
+	GuiControl, PresetMain:enable, PresetMisc
+	GuiControl, PresetMain:enable, PresetAll
+	GuiControl, PresetMain:enable, PresetPrivateServer
+	GuiControl, PresetMain:enable, PresetCollectTimers
+	GuiControl, PresetMain:enable, PresetBoostTimers
+	GuiControl, PresetMain:enable, PresetPlantersTimers
+	GuiControl, PresetMain:enable, PresetKillTimers
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FUNCTIONS
@@ -22169,30 +22128,76 @@ Loop, Files, %A_WorkingDir%\settings\presets\*.ini
 presetlist := RegExReplace(presetlist, "\|$")
 WinGetPos, gx, gy, gw, gh, Natro Macro
 Gui, PresetMain:New, +AlwaysOnTop +Owner%hGUI% -MinimizeBox
-Gui, PresetMain:Show, % "x" gx+85 " y" gy+35 " w300 h200", Preset Settings
-
+Gui, PresetMain:Show, % "x" gx+80 " y" gy+35 " w317 h236", Preset Settings
 Gui, PresetMain:Font, s9, Segoe UI
-Gui, PresetMain:Add, Button, x13 y38 w90 h21 gCreatePresetGui vCreatePresetGui, Create New
-Gui, PresetMain:Add, Button, gnm_DeletePreset x197 y51 w90 h21 vDeletePreset, &Delete
-Gui, PresetMain:Add, Button, x197 y28 w90 h21 gOverwritePresetGui vOverwritePresetGui, Overwrite
-Gui, PresetMain:Add, Button, x90 y174 w120 h21 gnm_LoadPreset vLoadPreset, Load Preset
-Gui, PresetMain:Add, DropDownList, x197 y5 w90 choose1 vPresetSelect, %presetlist%
-Gui, PresetMain:Add, Button, x145 y92.5 w10 h15 gHelpSection, ?
-Gui, PresetMain:Add, Button, x110 y128 w80 h23 gnm_ImportPreset vImportPreset, Import
-Gui, PresetMain:Add, Button, x110 y151 w80 h23 gnm_CopyPreset vCopyPreset, Export
+
+Gui, PresetMain:Add, GroupBox, x4 y2 w100 h120, Creation
+Gui, PresetMain:Add, Edit, hWndhEdtValue x9 y20 w90 h21 vSetPresetName gFileNameCleanup Limit15
+SendMessage 0x1501, 1, "Name",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
+Gui, PresetMain:Add, Button, x9 y45 w90 h21 gnm_CreatePreset vCreatePreset, Create New
+Gui, PresetMain:Add, Button, x9 y70 w90 h21 gnm_ImportPreset vImportPreset, Import
+Gui, PresetMain:Add, Button, x9 y95 w75 h21 gnm_ImportPreset vRenamePreset, Rename
+Gui, PresetMain:Add, Button, x88 y98 w10 h15 gRenameHelp, ?
+
+Gui, PresetMain:Add, GroupBox, x108 y2 w100 h145, Manage
+Gui, PresetMain:Add, DropDownList, x113 y20 w90 h21 choose1 vPresetSelect, %presetlist%
+Gui, PresetMain:Add, Button, x113 y45 w90 h21 gnm_OverwritePreset vOverwritePreset, Overwrite
+Gui, PresetMain:Add, Button, gnm_DeletePreset x113 y70 w90 h21 vDeletePreset, &Delete
+Gui, PresetMain:Add, Button, x113 y95 w90 h21 gnm_CopyPreset vCopyPreset, Export
+Gui, PresetMain:Add, Button, x113 y120 w90 h21 gnm_LoadPreset vLoadPreset, Load Preset
+
+Gui, PresetMain:Add, GroupBox, x212 y2 w100 h95, Timed
+
+Gui, PresetMain:Add, Button, x210 y130 w10 h15 gHelpSection, ?
+
 if (presetlist = "") {
     	GuiControl, Disable, PresetSelect
 	GuiControl, Disable, CopyPreset
 	GuiControl, Disable, DeletePreset
-	GuiControl, Disable, OverwritePresetGui
+	GuiControl, Disable, OverwritePreset
 	GuiControl, Disable, LoadPreset
+	GuiControl, Disable, RenamePreset
 }
-Gui, PresetMain:Add, GroupBox, x8 y2 w100 h170, Creation
+
+Gui, PresetMain:Add, CheckBox, x9 y130 w45 h21 gPresetAll vPresetAll, All
+Gui, PresetMain:Add, CheckBox, x9 y150 w60 h21 +Checked vPresetGather, Gather
+Gui, PresetMain:Add, CheckBox, x9 y170 w55 h21 +Checked vPresetQuest, Quest
+Gui, PresetMain:Add, CheckBox, x9 y190 w60 h21 +Checked vPresetSettings, Settings
+
+Gui, PresetMain:Add, CheckBox, x72 y150 w58 h21 vPresetDiscord gConfirmDiscord, Discord
+Gui, PresetMain:Add, CheckBox, x72 y170 w60 h21 vPresetPrivateServer, PS Link
+Gui, PresetMain:Add, CheckBox, x72 y190 w45 h21 +Checked vPresetMisc, Misc
+
+Gui, PresetMain:Add, CheckBox, x132 y150 w48 h21 +Checked gboosthide vPresetBoost, Boost
+Gui, PresetMain:Add, Text, x182 y148, _
+Gui, PresetMain:Add, CheckBox, x190 y150 w55 h21 vPresetBoostTimers, Timers
+
+Gui, PresetMain:Add, CheckBox, x132 y170 w57 h21 +Checked gcollecthide vPresetCollect, Collect
+Gui, PresetMain:Add, CheckBox, x190 y170 w55 h21 vPresetCollectTimers, Timers
+
+Gui, PresetMain:Add, CheckBox, x132 y190 w40 h21 +Checked gkillhide vPresetKill, Kill
+Gui, PresetMain:Add, CheckBox, x190 y190 w55 h21 vPresetKillTimers, Timers
+
+Gui, PresetMain:Add, CheckBox, x9 y210 w59 h21 +Checked gplanterhide vPresetPlanters, Planters
+Gui, PresetMain:Add, CheckBox, x72 y210 w55 h21 vPresetPlantersTimers, Timers
+return
+
+FileNameCleanup:
+GuiControlGet, SetPresetName
+userInput := SetPresetName
+if (RegExMatch(userInput, "[<>:""/\\|?*\[\]=;,]|[\s.]|^\.+$")) {
+	cleanedFileName := RegExReplace(userInput, "[<>:""/\\|?*\[\]=;,]|[\s.]|^\.+$", "")
+	GuiControl, PresetMain:, SetPresetName, %cleanedFileName%
+	send, {End} ;otherwise it sets cursor to the beginning of the text
+}
 return
 
 HelpSection:
 MsgBox, , Help, Cheese :3
 return
+
+RenameHelp:
+MsgBox, , Help, Select a preset under the Manage settings, and fill out a new name in the editbox under Creation settings, Then click Rename and your preset will be re-named.
 
 PresetAll:
 GuiControlGet, PresetAll
@@ -22207,10 +22212,6 @@ GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPrivateServer
 GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetSettings
 GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetMisc
 GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPrivateServer
-GuiControl, Show, PresetCollectTimers
-GuiControl, Show, PresetBoostTimers
-GuiControl, Show, PresetPlantersTimers
-GuiControl, Show, PresetKillTimers
 GuiControl, Enable, PresetCollectTimers
 GuiControl, Enable, PresetBoostTimers
 GuiControl, Enable, PresetPlantersTimers
@@ -22231,67 +22232,6 @@ GuiControl,, PresetPlantersTimers, % (PresetAll ? 1 : 0)
 GuiControl,, PresetKillTimers, % (PresetAll ? 1 : 0)
 return
 
-CreatePresetGui:
-nm_PresetPopup()
-return
-
-OverwritePresetGui:
-GuiControlGet, PresetSelect
-PresetName := PresetSelect
-PresetPath := A_WorkingDir . "\settings\presets\" . PresetName . ".ini"
-loop 3 {
-	ErrorCheck := (A_Index=1 && PresetName="") ? 1
-		: (A_Index=2 && PresetName="No Presets") ? 1
-		: (A_Index=3 && !FileExist(PresetPath)) ? 1 : 0
-	ErrorMsg := (A_Index=1) ? "No preset selected."
-		: (A_Index=2) ? "No presets created."
-		: (A_Index=3) ? "Preset " . PresetName . " does not exist."
-		: "Unknown Error"
-	if (ErrorCheck) {
-		MsgBox ,,, %ErrorMsg%, 5
-		return
-	}
-}
-nm_PresetPopup(1)
-return
-
-nm_PresetPopup(type:=0) {
-	global
-	WinGetPos, gx, gy, gw, gh, Preset Settings
-	Gui, PresetCreation:New
-	Gui, PresetCreation:Show, % "x" gx+95 " y" gy-22 " w150 h306", Create
-	Gui, PresetCreation:Font, s9, Segoe UI
-
-	Gui, PresetCreation:Add, Edit, hWndhEdtValue x10 y0 w120 h21 vSetPresetName
-	Gui, PresetCreation:Add, Button, gnm_OverwritePreset x15 y285 w120 h21 vOverwrite, Overwrite
-	Gui, PresetCreation:Add, Button, gnm_CreatePreset x15 y285 w120 h21 vCreate, Create
-	if (type=1) {
-		GuiControl, Disable, Create
-		GuiControl, Hide, Create
-		SendMessage 0x1501, 1, "Rename",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
-	} else {
-		GuiControl, Disable, Overwrite
-		GuiControl, Hide, Overwrite
-		SendMessage 0x1501, 1, "Name",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
-	}
-
-	Gui, PresetCreation:Add, CheckBox, x20 y46 w120 h23 +Checked vPresetGather, Gather
-	Gui, PresetCreation:Add, CheckBox, x20 y94 w59 h23 +Checked gkillhide vPresetKill, Kill
-	Gui, PresetCreation:Add, CheckBox, x20 y142 w120 h23 +Checked vPresetQuest, Quest
-	Gui, PresetCreation:Add, CheckBox, x20 y70 w59 h23 +Checked gcollecthide vPresetCollect, Collect
-	Gui, PresetCreation:Add, CheckBox, x20 y118 w59 h23 +Checked gboosthide vPresetBoost, Boost
-	Gui, PresetCreation:Add, CheckBox, x20 y166 w59 h23 +Checked gplanterhide vPresetPlanters, Planters
-	Gui, PresetCreation:Add, CheckBox, x20 y190 w120 h23 vPresetDiscord gConfirmDiscord, Discord
-    Gui, PresetCreation:Add, CheckBox, x20 y214 w120 h23 vPresetPrivateServer, Private Server Link
-	Gui, PresetCreation:Add, CheckBox, x20 y238 w120 h23 +Checked vPresetSettings, Settings
-	Gui, PresetCreation:Add, CheckBox, x20 y262 w120 h23 +Checked vPresetMisc, Misc
-    Gui, PresetCreation:Add, CheckBox, x10 y22 w120 h23 gPresetAll vPresetAll, All
-    Gui, PresetCreation:Add, CheckBox, x81 y70 w59 h23 vPresetCollectTimers, Timers
-    Gui, PresetCreation:Add, CheckBox, x81 y94 w59 h23 vPresetKillTimers, Timers
-    Gui, PresetCreation:Add, CheckBox, x81 y118 w59 h23 vPresetBoostTimers, Timers
-    Gui, PresetCreation:Add, CheckBox, x81 y166 w59 h23 vPresetPlantersTimers, Timers
-}
-
 ConfirmDiscord:
 GuiControlGet, PresetDiscord
 if (PresetDiscord=1) {
@@ -22302,19 +22242,27 @@ if (PresetDiscord=1) {
 return
 
 collecthide:
-nm_timerhide(1)
+GuiControlGet, CtrlValue,, PresetCollect
+GuiControl, % (CtrlValue ? "Enable" : "Disable"), PresetCollectTimers
+GuiControl,, PresetCollectTimers, 0
 return
 
 killhide:
-nm_timerhide(2)
+GuiControlGet, CtrlValue,, PresetKill
+GuiControl, % (CtrlValue ? "Enable" : "Disable"), PresetKillTimers
+GuiControl,, PresetKillTimers, 0
 return
 
 boosthide:
-nm_timerhide(3)
+GuiControlGet, CtrlValue,, PresetBoost
+GuiControl, % (CtrlValue ? "Enable" : "Disable"), PresetBoostTimers
+GuiControl,, PresetBoostTimers, 0
 return
 
 planterhide:
-nm_timerhide(4)
+GuiControlGet, CtrlValue,, PresetPlanters
+GuiControl, % (CtrlValue ? "Enable" : "Disable"), PresetPlantersTimers
+GuiControl,, PresetPlantersTimers, 0
 return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
