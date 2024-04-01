@@ -22128,7 +22128,6 @@ WinGetPos, gx, gy, gw, gh, Natro Macro
 Gui, PresetMain:New, +AlwaysOnTop +Owner%hGUI% -MinimizeBox
 Gui, PresetMain:Show, % "x" gx+80 " y" gy+35 " w317 h236", Preset Settings
 Gui, PresetMain:Font, s9, Segoe UI
-
 Gui, PresetMain:Add, GroupBox, x4 y2 w100 h120, Creation
 Gui, PresetMain:Add, Edit, hWndhEdtValue x9 y20 w90 h21 vSetPresetName gFileNameCleanup Limit15
 SendMessage 0x1501, 1, "Name",, ahk_id %hEdtValue% ; EM_SETCUEBANNER
@@ -22136,18 +22135,15 @@ Gui, PresetMain:Add, Button, x9 y45 w90 h21 gnm_CreatePreset vCreatePreset, Crea
 Gui, PresetMain:Add, Button, x9 y70 w90 h21 gnm_ImportPreset vImportPreset, Import
 Gui, PresetMain:Add, Button, x9 y95 w75 h21 gnm_ImportPreset vRenamePreset, Rename
 Gui, PresetMain:Add, Button, x88 y98 w10 h15 gRenameHelp, ?
-
 Gui, PresetMain:Add, GroupBox, x108 y2 w100 h145, Manage
-Gui, PresetMain:Add, DropDownList, x113 y20 w90 h21 choose1 vPresetSelect, %presetlist%
+Gui, PresetMain:Add, DropDownList, x113 y20 w90 choose1 vPresetSelect, %presetlist%
 Gui, PresetMain:Add, Button, x113 y45 w90 h21 gnm_OverwritePreset vOverwritePreset, Overwrite
 Gui, PresetMain:Add, Button, gnm_DeletePreset x113 y70 w90 h21 vDeletePreset, &Delete
 Gui, PresetMain:Add, Button, x113 y95 w90 h21 gnm_CopyPreset vCopyPreset, Export
 Gui, PresetMain:Add, Button, x113 y120 w90 h21 gnm_LoadPreset vLoadPreset, Load Preset
-
 Gui, PresetMain:Add, GroupBox, x212 y2 w100 h95, Timed
-
-Gui, PresetMain:Add, Button, x210 y130 w10 h15 gHelpSection, ?
-
+Gui, PresetMain:Add, Button, x217 y126 w10 h15 gRenameHelp, ?
+Gui, PresetMain:Add, Button, x233 y120 w70 h30 gnm_LoadPreset vPresetAdvanced, % (AutoFieldBoostActive ? "Advanced`n[ON]" : "Advanced`n[OFF]")
 if (presetlist = "") {
     	GuiControl, Disable, PresetSelect
 	GuiControl, Disable, CopyPreset
@@ -22156,28 +22152,26 @@ if (presetlist = "") {
 	GuiControl, Disable, LoadPreset
 	GuiControl, Disable, RenamePreset
 }
-
-Gui, PresetMain:Add, CheckBox, x9 y130 w45 h21 gPresetAll vPresetAll, All
-Gui, PresetMain:Add, CheckBox, x9 y150 w60 h21 +Checked vPresetGather, Gather
-Gui, PresetMain:Add, CheckBox, x9 y170 w55 h21 +Checked vPresetQuest, Quest
-Gui, PresetMain:Add, CheckBox, x9 y190 w60 h21 +Checked vPresetSettings, Settings
-
-Gui, PresetMain:Add, CheckBox, x72 y150 w58 h21 vPresetDiscord gConfirmDiscord, Discord
-Gui, PresetMain:Add, CheckBox, x72 y170 w60 h21 vPresetPrivateServer, PS Link
-Gui, PresetMain:Add, CheckBox, x72 y190 w45 h21 +Checked vPresetMisc, Misc
-
-Gui, PresetMain:Add, CheckBox, x132 y150 w48 h21 +Checked gboosthide vPresetBoost, Boost
-Gui, PresetMain:Add, Text, x182 y148, _
-Gui, PresetMain:Add, CheckBox, x190 y150 w55 h21 vPresetBoostTimers, Timers
-
-Gui, PresetMain:Add, CheckBox, x132 y170 w57 h21 +Checked gcollecthide vPresetCollect, Collect
-Gui, PresetMain:Add, CheckBox, x190 y170 w55 h21 vPresetCollectTimers, Timers
-
-Gui, PresetMain:Add, CheckBox, x132 y190 w40 h21 +Checked gkillhide vPresetKill, Kill
-Gui, PresetMain:Add, CheckBox, x190 y190 w55 h21 vPresetKillTimers, Timers
-
-Gui, PresetMain:Add, CheckBox, x9 y210 w59 h21 +Checked gplanterhide vPresetPlanters, Planters
-Gui, PresetMain:Add, CheckBox, x72 y210 w55 h21 vPresetPlantersTimers, Timers
+Gui, PresetMain:Add, Button, x9 y128 w10 h15 gHelpSection, ?
+Gui, PresetMain:Add, GroupBox, x4 y143 w308 h90, Included Settings
+Gui, PresetMain:Add, CheckBox, x9 y159 w60 h16 +Checked vPresetGather, Gather
+Gui, PresetMain:Add, CheckBox, x9 y177 w55 h16 +Checked vPresetQuest, Quest
+Gui, PresetMain:Add, CheckBox, x9 y195 w60 h16 +Checked vPresetSettings, Settings
+Gui, PresetMain:Add, CheckBox, x9 y213 w58 h16 vPresetDiscord, Discord
+Gui, PresetMain:Add, Text, x72 y160 w1 h67 0x7
+Gui, PresetMain:Add, CheckBox, x78 y159 w106 h16 +Checked vPresetFDefaults, Field Defaults
+Gui, PresetMain:Add, CheckBox, x78 y177 w45 h16 +Checked vPresetMisc, Misc
+Gui, PresetMain:Add, CheckBox, x78 y195 w60 h16 vPresetPrivateServer, PS Link
+Gui, PresetMain:Add, CheckBox, x78 y213 w106 h16 vPresetWebBot gConfirmWebBot, Token/Webhook
+Gui, PresetMain:Add, Text, x185 y160 w1 h67 0x7
+Gui, PresetMain:Add, CheckBox, x192 y159 w48 h16 +Checked gboosthide vPresetBoost, Boost
+Gui, PresetMain:Add, CheckBox, x255 y159 w55 h16 vPresetBoostTimers, Timers
+Gui, PresetMain:Add, CheckBox, x192 y177 w57 h16 +Checked gcollecthide vPresetCollect, Collect
+Gui, PresetMain:Add, CheckBox, x255 y177 w55 h16 vPresetCollectTimers, Timers
+Gui, PresetMain:Add, CheckBox, x192 y195 w40 h16 +Checked gkillhide vPresetKill, Kill
+Gui, PresetMain:Add, CheckBox, x255 y195 w55 h16 vPresetKillTimers, Timers
+Gui, PresetMain:Add, CheckBox, x192 y213 w59 h16 +Checked gplanterhide vPresetPlanters, Planters
+Gui, PresetMain:Add, CheckBox, x255 y213 w55 h16 vPresetPlantersTimers, Timers
 return
 
 FileNameCleanup:
@@ -22191,51 +22185,18 @@ if (RegExMatch(userInput, "[<>:""/\\|?*\[\]=;,]|[\s.]|^\.+$")) {
 return
 
 HelpSection:
-MsgBox, , Help, Cheese :3
+MsgBox, , Help, The Included Settings, each checkbox represents a different tab in natro macro to save.`n`nThere are a few exceptions:`nPS Link is your private server Link, Discord is the discord settings (screenshots, pings), Token/Webhook is your Bot Token and Webhook along with all your channel IDs and UserID, and Field Defaults is your saved gather settings for each field.
 return
 
 RenameHelp:
 MsgBox, , Help, Select a preset under the Manage settings, and fill out a new name in the editbox under Creation settings, Then click Rename and your preset will be re-named.
 
-PresetAll:
-GuiControlGet, PresetAll
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetGather
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetKill
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetQuest
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetCollect
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetBoost
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPlanters
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetDiscord
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPrivateServer
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetSettings
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetMisc
-GuiControl, % (PresetAll ? "Disable" : "Enable"), PresetPrivateServer
-GuiControl, Enable, PresetCollectTimers
-GuiControl, Enable, PresetBoostTimers
-GuiControl, Enable, PresetPlantersTimers
-GuiControl, Enable, PresetKillTimers
-GuiControl,, PresetGather, 1
-GuiControl,, PresetKill, 1
-GuiControl,, PresetQuest, 1
-GuiControl,, PresetCollect, 1
-GuiControl,, PresetBoost, 1
-GuiControl,, PresetPlanters, 1
-GuiControl,, PresetDiscord, % (PresetAll ? 1 : 0)
-GuiControl,, PresetPrivateServer, % (PresetAll ? 1 : 0)
-GuiControl,, PresetSettings, 1
-GuiControl,, PresetMisc, 1
-GuiControl,, PresetCollectTimers, % (PresetAll ? 1 : 0)
-GuiControl,, PresetBoostTimers, % (PresetAll ? 1 : 0)
-GuiControl,, PresetPlantersTimers, % (PresetAll ? 1 : 0)
-GuiControl,, PresetKillTimers, % (PresetAll ? 1 : 0)
-return
-
-ConfirmDiscord:
-GuiControlGet, PresetDiscord
-if (PresetDiscord=1) {
-    MsgBox, 4, Discord Confirmation, Are you sure you would like to enable save Discord Settings?
+ConfirmWebBot:
+GuiControlGet, PresetWebBot
+if (PresetWebBot=1) {
+    MsgBox, 4, Webhook and Token Confirmation, Are you sure you would like to enable save Bot token and Webhook? This is very dangerous if shared and could allow people with it to control your computer.`nThis also includes all channel IDs and the user ID for discord.
     IfMsgBox, No
-        GuiControl,, PresetDiscord, 0
+        GuiControl,, PresetWebBot, 0
 }
 return
 
