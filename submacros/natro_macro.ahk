@@ -22142,8 +22142,8 @@ Gui, PresetMain:Add, Button, gnm_DeletePreset x113 y70 w90 h21 vDeletePreset, &D
 Gui, PresetMain:Add, Button, x113 y95 w90 h21 gnm_CopyPreset vCopyPreset, Export
 Gui, PresetMain:Add, Button, x113 y120 w90 h21 gnm_LoadPreset vLoadPreset, Load Preset
 Gui, PresetMain:Add, GroupBox, x212 y2 w100 h95, Timed
-Gui, PresetMain:Add, Button, x217 y126 w10 h15 gRenameHelp, ?
-Gui, PresetMain:Add, Button, x233 y120 w70 h30 gnm_LoadPreset vPresetAdvanced, % (AutoFieldBoostActive ? "Advanced`n[ON]" : "Advanced`n[OFF]")
+Gui, PresetMain:Add, Button, x290 y126 w10 h15 gRenameHelp, ?
+Gui, PresetMain:Add, Button, x217 y115 w70 h30 gnm_LoadPreset vPresetAdvanced, % (AutoFieldBoostActive ? "Advanced`n[ON]" : "Advanced`n[OFF]")
 if (presetlist = "") {
     	GuiControl, Disable, PresetSelect
 	GuiControl, Disable, CopyPreset
